@@ -141,7 +141,7 @@ section { padding: 100px 24px; }
 
 /* PRICING */
 .pricing { background: var(--bg-primary); text-align: center; }
-.price-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 680px; margin: 0 auto; align-items: stretch; }
+.price-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 960px; margin: 0 auto; align-items: stretch; }
 .price-card {
   background: var(--bg-card); border-radius: var(--radius); padding: 40px 32px;
   border: 1px solid rgba(58,173,58,.15); position: relative; text-align: center;
@@ -161,7 +161,7 @@ section { padding: 100px 24px; }
 .price .amount { font-size: 3.5rem; font-weight: 800; color: var(--gold); line-height: 1; }
 .price .period { font-size: 1rem; color: var(--text-muted); }
 .price-monthly { color: var(--text-muted); font-size: .9rem; margin-top: 4px; margin-bottom: 8px; }
-.price-card ul { list-style: none; text-align: center; margin: 24px 0; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.price-card ul { list-style: none; text-align: left; margin: 24px 0; display: flex; flex-direction: column; gap: 10px; flex: 1; }
 .price-card li { color: var(--text-muted); font-size: .92rem; }
 .price-card li:first-child { color: var(--text); }
 .price-btn { width: 100%; margin-top: auto; padding: 14px; font-size: 1rem; }
@@ -236,7 +236,6 @@ footer {
   .course-stats { gap: 24px; }
   .modal { padding: 28px; }
   .price-cards { grid-template-columns: 1fr; max-width: 380px; }
-  .price-card.best { transform: none; }
   .device-row { flex-direction: column; gap: 16px; }
   .phone-img { height: 360px; }
   .watch-img { height: 200px; }
