@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AutoStrike Golf — GPS Golf Companion for iPhone</title>
-  <meta name="description" content="AutoStrike Golf — real-time GPS distances, handicap tracking, and multiplayer scoring for 25+ Malaysian courses.">
+  <meta name="description" content="AutoStrike Golf — real-time GPS distances, handicap tracking, and multiplayer scoring for courses across Southeast Asia.">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -27,6 +27,10 @@
     <h1><span class="gold">AutoStrike</span> Golf</h1>
     <p class="tagline">Your GPS Golf Companion</p>
     <div class="mockup">🏌️</div>
+    <div class="hero-cta">
+      <button class="cta-btn" onclick="openBetaModal()">Join the Beta</button>
+      <p class="slots-counter"><span class="slots-num" id="hero-slots">847</span> / 1,000 slots left</p>
+    </div>
     <p class="scroll-hint">↓ Scroll to explore</p>
   </div>
 </section>
@@ -68,16 +72,6 @@
         <p>Track your clubs and average distances for smarter club selection.</p>
       </div>
       <div class="feature-card fade-in">
-        <span class="feature-icon">⛳</span>
-        <h3>Multiple Tee Boxes</h3>
-        <p>Support for up to 5 tee boxes per course — play from any tee, any day.</p>
-      </div>
-      <div class="feature-card fade-in">
-        <span class="feature-icon">🔄</span>
-        <h3>27-Hole Support</h3>
-        <p>Full support for courses with 3 nines — pick any combination of nines to play.</p>
-      </div>
-      <div class="feature-card fade-in">
         <span class="feature-icon">📈</span>
         <h3>Round History</h3>
         <p>Full history with stats, score differentials, and performance trends over time.</p>
@@ -89,29 +83,20 @@
 <section class="courses" id="courses">
   <div class="section-inner">
     <p class="section-label fade-in">Course Coverage</p>
-    <h2 class="section-title fade-in">25+ Malaysian courses and growing</h2>
+    <h2 class="section-title fade-in">Global coverage and growing</h2>
     <p class="section-sub fade-in">Precise GPS coordinates and slope/CR ratings for every tee box. New courses added regularly.</p>
     <div class="course-stats fade-in">
-      <div class="stat"><span class="num">25+</span><span class="label">Courses</span></div>
-      <div class="stat"><span class="num">450+</span><span class="label">Holes Mapped</span></div>
-      <div class="stat"><span class="num">5</span><span class="label">Tee Boxes / Course</span></div>
+      <div class="stat"><span class="num">27+</span><span class="label">Courses</span></div>
+      <div class="stat"><span class="num">500+</span><span class="label">Holes Mapped</span></div>
+      <div class="stat"><span class="num">3</span><span class="label">Countries</span></div>
     </div>
-    <div class="course-list fade-in">
-      <span class="course-tag">KLGCC East</span>
-      <span class="course-tag">KLGCC West</span>
-      <span class="course-tag">KGPA</span>
-      <span class="course-tag">Saujana Palm</span>
-      <span class="course-tag">Saujana Bunga Raya</span>
-      <span class="course-tag">Glenmarie Garden</span>
-      <span class="course-tag">Glenmarie Valley</span>
-      <span class="course-tag">The Els Club</span>
-      <span class="course-tag">TPC KL</span>
-      <span class="course-tag">Tropicana Golf</span>
-      <span class="course-tag">Kota Permai</span>
-      <span class="course-tag">Templer Park</span>
-      <span class="course-tag">Seri Selangor</span>
-      <span class="course-tag">Rahman Putra</span>
-      <span class="course-tag">& more…</span>
+    <div class="country-tabs fade-in" id="country-tabs">
+      <button class="country-tab active" data-country="Malaysia">🇲🇾 Malaysia</button>
+      <button class="country-tab" data-country="Singapore">🇸🇬 Singapore</button>
+      <button class="country-tab" data-country="Indonesia">🇮🇩 Indonesia</button>
+    </div>
+    <div class="course-list fade-in" id="course-list">
+      <!-- populated by JS -->
     </div>
   </div>
 </section>
@@ -151,11 +136,26 @@
   <div class="section-inner">
     <p class="section-label fade-in">Get Started</p>
     <h2 class="section-title fade-in">Ready to level up your game?</h2>
-    <p class="section-sub fade-in" style="margin-left:auto;margin-right:auto;">AutoStrike Golf is currently in beta testing. Join the TestFlight to get early access.</p>
-    <a href="#" class="cta-btn fade-in">Coming Soon to TestFlight</a>
+    <p class="section-sub fade-in" style="margin-left:auto;margin-right:auto;">AutoStrike Golf is currently in beta. Sign up to get early access.</p>
+    <button class="cta-btn fade-in" onclick="openBetaModal()">Join the Beta</button>
+    <p class="slots-counter fade-in"><span class="slots-num" id="cta-slots">847</span> / 1,000 slots left</p>
     <p class="note fade-in">iPhone only · iOS 17+ · Free during beta</p>
   </div>
 </section>
+
+<!-- Beta signup modal -->
+<div class="modal-overlay" id="beta-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeBetaModal()">✕</button>
+    <h2>Join the <span class="gold">Beta</span></h2>
+    <p>Enter your email and we'll send you an invite code when your slot opens.</p>
+    <form id="beta-form" onsubmit="submitBeta(event)">
+      <input type="email" id="beta-email" placeholder="your@email.com" required>
+      <button type="submit" class="cta-btn submit-btn" id="beta-submit">Get My Invite</button>
+    </form>
+    <p class="modal-note" id="beta-status"></p>
+  </div>
+</div>
 
 <footer>
   <p>&copy; 2026 AutoStrike Golf. All rights reserved.</p>
