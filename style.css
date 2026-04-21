@@ -67,9 +67,9 @@ nav {
 .hero h1 .gold { color: var(--gold); }
 .hero .tagline { font-size: clamp(1.1rem, 2.5vw, 1.5rem); color: var(--text-muted); margin-bottom: 40px; }
 .device-row { display: flex; align-items: center; justify-content: center; gap: 24px; margin-bottom: 8px; }
-.mockup-img { border-radius: 16px; object-fit: contain; filter: drop-shadow(0 30px 60px rgba(0,0,0,.5)); }
-.phone-img { height: 440px; }
-.watch-img { height: 260px; }
+.mockup-img { object-fit: contain; filter: drop-shadow(0 30px 60px rgba(0,0,0,.5)); }
+.phone-img { height: 560px; }
+.watch-img { height: 340px; }
 .hero-cta { margin-top: 36px; }
 .slots-counter { color: var(--text-muted); font-size: .9rem; margin-top: 12px; }
 .slots-num { color: var(--gold); font-weight: 700; }
