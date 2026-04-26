@@ -38,8 +38,10 @@ nav {
   display: flex; align-items: center; justify-content: space-between;
   padding: 16px 24px;
 }
-.logo { font-size: 1.25rem; font-weight: 700; color: var(--gold); text-decoration: none; letter-spacing: -.5px; }
-.logo span { color: var(--text); }
+.logo { display: inline-flex; align-items: center; gap: 10px; font-size: 1.25rem; font-weight: 700; color: var(--text); text-decoration: none; letter-spacing: -.5px; }
+.logo .gold { color: var(--gold); }
+.logo-img { width: 36px; height: 36px; object-fit: contain; border-radius: 6px; }
+.logo-text { line-height: 1; }
 .nav-links { display: flex; gap: 32px; list-style: none; }
 .nav-links a { color: var(--text-muted); text-decoration: none; font-size: .9rem; transition: color .2s; }
 .nav-links a:hover { color: var(--gold); }
