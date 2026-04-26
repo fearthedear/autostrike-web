@@ -1,7 +1,7 @@
 // ── Live course search (autostrike-dashboard catalog API) ──
 const API_BASE = 'https://autostrike-dashboard.vercel.app';
 let searchDebounce = null;
-let lastQuery = '';
+let searchSeq = 0;        // discard out-of-order responses
 let selectedCountry = '';
 
 async function fetchCourses(q) {
@@ -15,7 +15,7 @@ async function fetchCourses(q) {
   return Array.isArray(data.courses) ? data.courses : [];
 }
 
-function renderCourseResults(courses, isFallback) {
+function renderCourseResults(courses) {
   const list = document.getElementById('course-list');
   if (!courses.length) {
     list.innerHTML = '<p class="course-empty">No matches. Try a different name.</p>';
@@ -25,58 +25,41 @@ function renderCourseResults(courses, isFallback) {
     const loc = c.location || c.country || '';
     return `<div class="course-result"><span class="course-name">${escapeHtml(c.name)}</span>${loc ? `<span class="course-loc">${escapeHtml(loc)}</span>` : ''}</div>`;
   }).join('');
-  const hint = document.getElementById('course-search-hint');
-  if (hint && isFallback) hint.textContent = 'A few examples from our 28,000+ catalog — search to find yours';
 }
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[ch]));
 }
 
-async function runSearch(q) {
+function setHint(text) {
   const hint = document.getElementById('course-search-hint');
+  if (hint) hint.textContent = text;
+}
+
+async function runQuery() {
+  const q = (searchInput && searchInput.value.trim()) || '';
+  const seq = ++searchSeq;
+  setHint(q ? 'Searching…' : (selectedCountry ? `Loading ${selectedCountry} courses…` : 'Loading…'));
   try {
     const courses = await fetchCourses(q);
-    renderCourseResults(courses, !q);
-    if (q) hint.textContent = `${courses.length} match${courses.length === 1 ? '' : 'es'}`;
-  } catch (e) {
-    hint.textContent = 'Search temporarily unavailable.';
-  }
-}
-
-function onSearchInput(ev) {
-  const q = ev.target.value.trim();
-  if (q === lastQuery) return;
-  lastQuery = q;
-  if (searchDebounce) clearTimeout(searchDebounce);
-  searchDebounce = setTimeout(() => runSearch(q), 220);
-}
-
-async function loadInitialCatalog() {
-  // Show a curated mix of well-known courses on first paint.
-  const SEEDS = ['Pebble Beach', 'Royal Melbourne', 'St Andrews', 'Augusta'];
-  for (const seed of SEEDS) {
-    try {
-      const c = await fetchCourses(seed);
-      if (c.length) { renderCourseResults(c.slice(0, 8), true); return; }
-    } catch {}
-  }
-  renderCourseResults([], true);
-}
-
-async function loadCountryCourses() {
-  const hint = document.getElementById('course-search-hint');
-  try {
-    const courses = await fetchCourses('');
-    renderCourseResults(courses, true);
-    if (hint) {
-      hint.textContent = selectedCountry
-        ? `Sample courses in ${selectedCountry} — search to find more`
-        : 'A few examples from our 28,000+ catalog — search to find yours';
+    if (seq !== searchSeq) return; // a newer query started
+    renderCourseResults(courses);
+    if (q) {
+      setHint(`${courses.length} match${courses.length === 1 ? '' : 'es'}${selectedCountry ? ` in ${selectedCountry}` : ''}`);
+    } else if (selectedCountry) {
+      setHint(`Sample courses in ${selectedCountry} — type to search`);
+    } else {
+      setHint('Live search across 28,000+ courses worldwide');
     }
   } catch {
-    if (hint) hint.textContent = 'Search temporarily unavailable.';
+    if (seq !== searchSeq) return;
+    setHint('Search temporarily unavailable.');
   }
+}
+
+function scheduleQuery(delay = 220) {
+  if (searchDebounce) clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(runQuery, delay);
 }
 
 // ── Scroll fade-in ──
@@ -93,8 +76,35 @@ navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => na
 
 // ── Course search wiring ──
 const searchInput = document.getElementById('course-search-input');
+const searchBox = document.getElementById('course-search-box');
+const searchClear = document.getElementById('course-search-clear');
+
+function syncClearVisibility() {
+  if (!searchBox || !searchInput) return;
+  searchBox.classList.toggle('has-value', searchInput.value.length > 0);
+}
+
 if (searchInput) {
-  searchInput.addEventListener('input', onSearchInput);
+  searchInput.addEventListener('input', () => {
+    syncClearVisibility();
+    scheduleQuery(220);
+  });
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      searchInput.value = '';
+      syncClearVisibility();
+      scheduleQuery(0);
+    }
+  });
+}
+if (searchClear) {
+  searchClear.addEventListener('click', () => {
+    if (!searchInput) return;
+    searchInput.value = '';
+    syncClearVisibility();
+    searchInput.focus();
+    scheduleQuery(0);
+  });
 }
 
 // ── Country tab wiring ──
@@ -103,13 +113,7 @@ document.querySelectorAll('.country-tab').forEach(tab => {
     document.querySelectorAll('.country-tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
     selectedCountry = tab.dataset.country || '';
-    const q = searchInput ? searchInput.value.trim() : '';
-    if (q) {
-      lastQuery = '';
-      runSearch(q);
-    } else {
-      loadCountryCourses();
-    }
+    scheduleQuery(0);
   });
 });
 
@@ -184,5 +188,5 @@ window.closeBetaModal = closeBetaModal;
 window.submitBeta = submitBeta;
 
 // ── Init ──
-loadInitialCatalog();
+runQuery();
 updateSlots();
