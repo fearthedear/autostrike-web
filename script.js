@@ -1,33 +1,65 @@
-// ── Course data by country ──
-const COURSES = {
-  Malaysia: [
-    'KLGCC East', 'KLGCC West', 'KGPA', 'Saujana Palm', 'Saujana Bunga Raya',
-    'Glenmarie Garden', 'Glenmarie Valley', 'Templer Park', 'Rahman Putra Hills',
-    'Rahman Putra Lakes', 'Kota Permai', 'Kota Seriemas', 'The Mines Resort',
-    'Seri Selangor', 'Bukit Jalil', 'Nilai Springs', 'Palm Garden',
-    'KGNS Kelana', 'KGNS Putra', 'KGSAAS', 'Damai Laut',
-    'Bangi Golf Resort', 'Els Club Desaru Valley', 'Els Club Teluk Datai',
-    'Kinrara Golf Club', 'Bukit Unggul Country Club',
-  ],
-  Singapore: [
-    'Coming soon…'
-  ],
-  Indonesia: [
-    'Coming soon…'
-  ]
-};
+// ── Live course search (autostrike-dashboard catalog API) ──
+const API_BASE = 'https://autostrike-dashboard.vercel.app';
+let searchDebounce = null;
+let lastQuery = '';
 
-let activeCountry = 'Malaysia';
+async function fetchCourses(q) {
+  const url = q
+    ? `${API_BASE}/api/unmapped-courses?q=${encodeURIComponent(q)}&limit=20`
+    : `${API_BASE}/api/unmapped-courses?limit=20`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('search failed');
+  const data = await res.json();
+  return Array.isArray(data.courses) ? data.courses : [];
+}
 
-function renderCourses(country) {
-  activeCountry = country;
+function renderCourseResults(courses, isFallback) {
   const list = document.getElementById('course-list');
-  list.innerHTML = COURSES[country].map(c =>
-    `<span class="course-tag">${c}</span>`
-  ).join('');
-  document.querySelectorAll('.country-tab').forEach(tab => {
-    tab.classList.toggle('active', tab.dataset.country === country);
-  });
+  if (!courses.length) {
+    list.innerHTML = '<p class="course-empty">No matches. Try a different name.</p>';
+    return;
+  }
+  list.innerHTML = courses.map(c => {
+    const loc = c.location || c.country || '';
+    return `<div class="course-result"><span class="course-name">${escapeHtml(c.name)}</span>${loc ? `<span class="course-loc">${escapeHtml(loc)}</span>` : ''}</div>`;
+  }).join('');
+  const hint = document.getElementById('course-search-hint');
+  if (hint && isFallback) hint.textContent = 'A few examples from our 28,000+ catalog — search to find yours';
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[ch]));
+}
+
+async function runSearch(q) {
+  const hint = document.getElementById('course-search-hint');
+  try {
+    const courses = await fetchCourses(q);
+    renderCourseResults(courses, !q);
+    if (q) hint.textContent = `${courses.length} match${courses.length === 1 ? '' : 'es'}`;
+  } catch (e) {
+    hint.textContent = 'Search temporarily unavailable.';
+  }
+}
+
+function onSearchInput(ev) {
+  const q = ev.target.value.trim();
+  if (q === lastQuery) return;
+  lastQuery = q;
+  if (searchDebounce) clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(() => runSearch(q), 220);
+}
+
+async function loadInitialCatalog() {
+  // Show a curated mix of well-known courses on first paint.
+  const SEEDS = ['Pebble Beach', 'Royal Melbourne', 'St Andrews', 'Augusta'];
+  for (const seed of SEEDS) {
+    try {
+      const c = await fetchCourses(seed);
+      if (c.length) { renderCourseResults(c.slice(0, 8), true); return; }
+    } catch {}
+  }
+  renderCourseResults([], true);
 }
 
 // ── Scroll fade-in ──
@@ -42,10 +74,11 @@ const navLinks = document.querySelector('.nav-links');
 hamburger.addEventListener('click', () => navLinks.classList.toggle('open'));
 navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
 
-// ── Country tabs ──
-document.querySelectorAll('.country-tab').forEach(tab => {
-  tab.addEventListener('click', () => renderCourses(tab.dataset.country));
-});
+// ── Course search wiring ──
+const searchInput = document.getElementById('course-search-input');
+if (searchInput) {
+  searchInput.addEventListener('input', onSearchInput);
+}
 
 // ── Fake slot counter (deterministic from date) ──
 function getSlots() {
@@ -118,5 +151,5 @@ window.closeBetaModal = closeBetaModal;
 window.submitBeta = submitBeta;
 
 // ── Init ──
-renderCourses('Malaysia');
+loadInitialCatalog();
 updateSlots();

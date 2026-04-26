@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AutoStrike Golf — GPS Golf Companion for iPhone</title>
-  <meta name="description" content="AutoStrike Golf — real-time GPS distances, handicap tracking, and multiplayer scoring for courses across Southeast Asia.">
+  <meta name="description" content="AutoStrike Golf — real-time GPS distances, handicap tracking, and multiplayer scoring. 28,000+ courses available worldwide across 166 countries.">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -97,17 +97,16 @@
 <section class="courses" id="courses">
   <div class="section-inner">
     <p class="section-label fade-in">Course Coverage</p>
-    <h2 class="section-title fade-in">Global coverage and growing</h2>
-    <p class="section-sub fade-in">Precise GPS coordinates and slope/CR ratings for every tee box. New courses added regularly.</p>
+    <h2 class="section-title fade-in">Any course. Anywhere on Earth.</h2>
+    <p class="section-sub fade-in">28,000+ courses across 166 countries are searchable in-app. Tap any one and we'll precisely map every hole, tee box, and green within a minute — automatically.</p>
     <div class="course-stats fade-in">
-      <div class="stat"><span class="num">27+</span><span class="label">Courses</span></div>
-      <div class="stat"><span class="num">500+</span><span class="label">Holes Mapped</span></div>
-      <div class="stat"><span class="num">3</span><span class="label">Countries</span></div>
+      <div class="stat"><span class="num" id="stat-mapped">350+</span><span class="label">Fully Mapped</span></div>
+      <div class="stat"><span class="num" id="stat-catalog">28,000+</span><span class="label">Searchable Worldwide</span></div>
+      <div class="stat"><span class="num">166</span><span class="label">Countries</span></div>
     </div>
-    <div class="country-tabs fade-in" id="country-tabs">
-      <button class="country-tab active" data-country="Malaysia">🇲🇾 Malaysia</button>
-      <button class="country-tab" data-country="Singapore">🇸🇬 Singapore</button>
-      <button class="country-tab" data-country="Indonesia">🇮🇩 Indonesia</button>
+    <div class="course-search fade-in">
+      <input type="text" id="course-search-input" placeholder="Try it — search any course (e.g. Pebble Beach, St Andrews, Royal Melbourne)…" autocomplete="off">
+      <p class="course-search-hint" id="course-search-hint">Live search across 28,000+ courses</p>
     </div>
     <div class="course-list fade-in" id="course-list">
       <!-- populated by JS -->
