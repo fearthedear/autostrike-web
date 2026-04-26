@@ -112,7 +112,6 @@
       <p class="course-search-hint" id="course-search-hint">Live search across 28,000+ courses</p>
     </div>
     <div class="country-tabs fade-in" id="country-tabs">
-      <button class="country-tab active" data-country="">🌍 All</button>
       <button class="country-tab" data-country="Malaysia">🇲🇾 Malaysia</button>
       <button class="country-tab" data-country="Singapore">🇸🇬 Singapore</button>
       <button class="country-tab" data-country="Indonesia">🇮🇩 Indonesia</button>
@@ -124,6 +123,11 @@
     </div>
     <div class="course-list fade-in" id="course-list">
       <!-- populated by JS -->
+    </div>
+    <div class="course-pager" id="course-pager" hidden>
+      <button type="button" class="pager-btn" id="pager-prev">← Prev</button>
+      <span class="pager-info" id="pager-info"></span>
+      <button type="button" class="pager-btn" id="pager-next">Next →</button>
     </div>
   </div>
 </section>
