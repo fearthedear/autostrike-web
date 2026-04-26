@@ -2,12 +2,14 @@
 const API_BASE = 'https://autostrike-dashboard.vercel.app';
 let searchDebounce = null;
 let lastQuery = '';
+let selectedCountry = '';
 
 async function fetchCourses(q) {
-  const url = q
-    ? `${API_BASE}/api/unmapped-courses?q=${encodeURIComponent(q)}&limit=20`
-    : `${API_BASE}/api/unmapped-courses?limit=20`;
-  const res = await fetch(url);
+  const params = new URLSearchParams();
+  if (q) params.set('q', q);
+  if (selectedCountry) params.set('country', selectedCountry);
+  params.set('limit', '20');
+  const res = await fetch(`${API_BASE}/api/unmapped-courses?${params.toString()}`);
   if (!res.ok) throw new Error('search failed');
   const data = await res.json();
   return Array.isArray(data.courses) ? data.courses : [];
@@ -62,6 +64,21 @@ async function loadInitialCatalog() {
   renderCourseResults([], true);
 }
 
+async function loadCountryCourses() {
+  const hint = document.getElementById('course-search-hint');
+  try {
+    const courses = await fetchCourses('');
+    renderCourseResults(courses, true);
+    if (hint) {
+      hint.textContent = selectedCountry
+        ? `Sample courses in ${selectedCountry} — search to find more`
+        : 'A few examples from our 28,000+ catalog — search to find yours';
+    }
+  } catch {
+    if (hint) hint.textContent = 'Search temporarily unavailable.';
+  }
+}
+
 // ── Scroll fade-in ──
 const obs = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
@@ -79,6 +96,22 @@ const searchInput = document.getElementById('course-search-input');
 if (searchInput) {
   searchInput.addEventListener('input', onSearchInput);
 }
+
+// ── Country tab wiring ──
+document.querySelectorAll('.country-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.country-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    selectedCountry = tab.dataset.country || '';
+    const q = searchInput ? searchInput.value.trim() : '';
+    if (q) {
+      lastQuery = '';
+      runSearch(q);
+    } else {
+      loadCountryCourses();
+    }
+  });
+});
 
 // ── Fake slot counter (deterministic from date) ──
 function getSlots() {

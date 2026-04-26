@@ -98,15 +98,28 @@
   <div class="section-inner">
     <p class="section-label fade-in">Course Coverage</p>
     <h2 class="section-title fade-in">Any course. Anywhere on Earth.</h2>
-    <p class="section-sub fade-in">28,000+ courses across 166 countries are searchable in-app. Tap any one and we'll precisely map every hole, tee box, and green within a minute — automatically.</p>
+    <p class="section-sub fade-in">28,000+ courses across 166 countries — available right in the app.</p>
     <div class="course-stats fade-in">
-      <div class="stat"><span class="num" id="stat-mapped">350+</span><span class="label">Fully Mapped</span></div>
-      <div class="stat"><span class="num" id="stat-catalog">28,000+</span><span class="label">Searchable Worldwide</span></div>
+      <div class="stat"><span class="num" id="stat-catalog">28,000+</span><span class="label">Courses Available</span></div>
       <div class="stat"><span class="num">166</span><span class="label">Countries</span></div>
     </div>
     <div class="course-search fade-in">
-      <input type="text" id="course-search-input" placeholder="Try it — search any course (e.g. Pebble Beach, St Andrews, Royal Melbourne)…" autocomplete="off">
+      <div class="course-search-box">
+        <svg class="course-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <input type="text" id="course-search-input" placeholder="Search any course — Pebble Beach, St Andrews, Royal Melbourne…" autocomplete="off">
+      </div>
       <p class="course-search-hint" id="course-search-hint">Live search across 28,000+ courses</p>
+    </div>
+    <div class="country-tabs fade-in" id="country-tabs">
+      <button class="country-tab active" data-country="">🌍 All</button>
+      <button class="country-tab" data-country="Malaysia">🇲🇾 Malaysia</button>
+      <button class="country-tab" data-country="Singapore">🇸🇬 Singapore</button>
+      <button class="country-tab" data-country="Indonesia">🇮🇩 Indonesia</button>
+      <button class="country-tab" data-country="Thailand">🇹🇭 Thailand</button>
+      <button class="country-tab" data-country="United States">🇺🇸 USA</button>
+      <button class="country-tab" data-country="United Kingdom">🇬🇧 UK</button>
+      <button class="country-tab" data-country="Australia">🇦🇺 Australia</button>
+      <button class="country-tab" data-country="Japan">🇯🇵 Japan</button>
     </div>
     <div class="course-list fade-in" id="course-list">
       <!-- populated by JS -->
