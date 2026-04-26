@@ -174,13 +174,11 @@ if (pagerPrev) pagerPrev.addEventListener('click', () => {
   if (currentOffset === 0) return;
   currentOffset = Math.max(0, currentOffset - PAGE_SIZE);
   scheduleQuery(0, false);
-  document.getElementById('course-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 if (pagerNext) pagerNext.addEventListener('click', () => {
   if (currentOffset + PAGE_SIZE >= currentTotal) return;
   currentOffset += PAGE_SIZE;
   scheduleQuery(0, false);
-  document.getElementById('course-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
 // ── Fake slot counter (deterministic from date) ──
