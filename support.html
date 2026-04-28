@@ -118,10 +118,11 @@ async function submitSupport(event) {
   btn.textContent = 'Sending…';
 
   try {
-    const res = await fetch('https://autostrike-dashboard.vercel.app/api/support', {
+    const res = await fetch('https://autostrike-dashboard.vercel.app/api/feedback', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        target: 'support',
         email, subject, category, message,
         device: navigator.platform || '',
         os_version: '',
