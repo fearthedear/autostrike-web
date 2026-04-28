@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Support — AutoStrike Golf</title>
+  <meta name="description" content="Get help with AutoStrike Golf. Report a bug, request a course, or ask a question.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="logo-64.png">
+  <link rel="apple-touch-icon" href="logo-64.png">
+  <style>
+    .support { padding: 140px 24px 80px; }
+    .support-inner { max-width: 640px; margin: 0 auto; }
+    .support-inner h1 { font-size: 2.4rem; letter-spacing: -1px; margin-bottom: 8px; text-align: center; }
+    .support-inner h1 .gold { color: var(--gold); }
+    .support-inner .lead { color: var(--text-muted); text-align: center; margin-bottom: 36px; }
+    .support-card {
+      background: var(--bg-card); border: 1px solid rgba(201,169,110,.15);
+      border-radius: var(--radius); padding: 32px;
+    }
+    .support-card label { display: block; font-size: .85rem; color: var(--text-muted); margin-bottom: 6px; margin-top: 16px; }
+    .support-card label:first-of-type { margin-top: 0; }
+    .support-card input, .support-card select, .support-card textarea {
+      width: 100%; padding: 12px 14px;
+      background: var(--bg-secondary); color: var(--text);
+      border: 1px solid rgba(201,169,110,.25); border-radius: 10px;
+      font-family: var(--font); font-size: .95rem;
+    }
+    .support-card input:focus, .support-card select:focus, .support-card textarea:focus {
+      outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,169,110,.15);
+    }
+    .support-card textarea { min-height: 160px; resize: vertical; }
+    .support-card .submit-row { margin-top: 24px; display: flex; flex-direction: column; gap: 12px; align-items: stretch; }
+    .support-status { text-align: center; min-height: 1.4em; font-size: .9rem; color: var(--text-muted); }
+    .support-status.success { color: #79e07d; }
+    .support-status.error { color: #ff7878; }
+    .support-meta {
+      margin-top: 24px; text-align: center; color: var(--text-muted); font-size: .85rem;
+    }
+    .support-meta a { color: var(--gold); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="logo"><img src="logo.webp" alt="AutoStrike" class="logo-img"><span class="logo-text">AutoStrike <span class="gold">Golf</span></span></a>
+    <ul class="nav-links">
+      <li><a href="/#features">Features</a></li>
+      <li><a href="/#courses">Courses</a></li>
+      <li><a href="/#pricing">Pricing</a></li>
+      <li><a href="/support.html">Support</a></li>
+    </ul>
+  </div>
+</nav>
+
+<section class="support">
+  <div class="support-inner">
+    <h1>How can we <span class="gold">help</span>?</h1>
+    <p class="lead">Bug reports, missing courses, billing questions — drop us a note and we'll get back to you.</p>
+
+    <div class="support-card">
+      <form id="support-form" onsubmit="submitSupport(event)">
+        <label for="email">Your email</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" required autocomplete="email">
+
+        <label for="category">Category</label>
+        <select id="category" name="category">
+          <option value="general">General question</option>
+          <option value="bug">Bug report</option>
+          <option value="course">Missing or wrong course</option>
+          <option value="billing">Billing / subscription</option>
+          <option value="account">Account / data</option>
+          <option value="feature">Feature request</option>
+        </select>
+
+        <label for="subject">Subject</label>
+        <input type="text" id="subject" name="subject" placeholder="Short summary" maxlength="200">
+
+        <label for="message">Message</label>
+        <textarea id="message" name="message" placeholder="Tell us what's going on. The more detail the better." required minlength="5" maxlength="5000"></textarea>
+
+        <div class="submit-row">
+          <button type="submit" class="cta-btn submit-btn" id="support-submit">Send message</button>
+          <p class="support-status" id="support-status"></p>
+        </div>
+      </form>
+    </div>
+
+    <p class="support-meta">By submitting you agree to our <a href="/privacy.html">privacy policy</a>.</p>
+  </div>
+</section>
+
+<footer>
+  <p>&copy; 2026 AutoStrike Golf. All rights reserved. · <a href="/privacy.html" style="color:var(--text-muted)">Privacy</a> · <a href="/support.html" style="color:var(--text-muted)">Support</a></p>
+</footer>
+
+<script>
+async function submitSupport(event) {
+  event.preventDefault();
+  const status = document.getElementById('support-status');
+  const btn = document.getElementById('support-submit');
+  const email = document.getElementById('email').value.trim();
+  const subject = document.getElementById('subject').value.trim();
+  const category = document.getElementById('category').value;
+  const message = document.getElementById('message').value.trim();
+
+  status.className = 'support-status';
+  status.textContent = '';
+
+  if (!email || !message) {
+    status.className = 'support-status error';
+    status.textContent = 'Email and message are required.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  try {
+    const res = await fetch('https://autostrike-dashboard.vercel.app/api/support', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email, subject, category, message,
+        device: navigator.platform || '',
+        os_version: '',
+      }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(json.error || 'Failed to send. Please try again.');
+    }
+    status.className = 'support-status success';
+    status.textContent = "Thanks — we got it. We'll reply by email soon.";
+    document.getElementById('support-form').reset();
+    btn.textContent = 'Sent';
+    setTimeout(() => { btn.disabled = false; btn.textContent = 'Send another'; }, 1500);
+  } catch (err) {
+    status.className = 'support-status error';
+    status.textContent = err.message || 'Failed to send. Please try again.';
+    btn.disabled = false;
+    btn.textContent = 'Send message';
+  }
+}
+</script>
+</body>
+</html>
