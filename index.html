@@ -40,8 +40,8 @@
       </div>
     </div>
     <div class="hero-cta">
-      <button class="cta-btn" onclick="openBetaModal()">Get Early Access</button>
-      <p class="slots-counter"><span class="slots-num" id="hero-slots">847</span> / 1,000 slots left</p>
+      <a class="cta-btn" href="https://app.autostrikegolf.com">Download on the App Store</a>
+      <p class="note">iPhone only · iOS 17+</p>
     </div>
     <p class="scroll-hint">↓ Scroll to explore</p>
   </div>
@@ -182,7 +182,7 @@
           <li>Handicap tracking</li>
           <li>All courses included</li>
         </ul>
-        <button class="cta-btn price-btn" onclick="openBetaModal()">Get Early Access</button>
+        <a class="cta-btn price-btn" href="https://app.autostrikegolf.com">Download</a>
       </div>
       <div class="price-card fade-in">
         <h3>Monthly</h3>
@@ -194,7 +194,7 @@
           <li>Handicap tracking</li>
           <li>All courses included</li>
         </ul>
-        <button class="cta-btn price-btn" onclick="openBetaModal()">Get Early Access</button>
+        <a class="cta-btn price-btn" href="https://app.autostrikegolf.com">Download</a>
       </div>
       <div class="price-card best fade-in">
         <div class="save-badge">Save 30%</div>
@@ -204,11 +204,10 @@
         <ul>
           <li>Everything in Monthly</li>
           <li>Best value</li>
-          <li>Lock in early pricing</li>
           <li>Priority new features</li>
           <li>All courses included</li>
         </ul>
-        <button class="cta-btn price-btn" onclick="openBetaModal()">Get Early Access</button>
+        <a class="cta-btn price-btn" href="https://app.autostrikegolf.com">Download</a>
       </div>
     </div>
   </div>
@@ -218,26 +217,11 @@
   <div class="section-inner">
     <p class="section-label fade-in">Get Started</p>
     <h2 class="section-title fade-in">Ready to level up your game?</h2>
-    <p class="section-sub fade-in" style="margin-left:auto;margin-right:auto;">AutoStrike Golf is launching soon. Sign up to get early access.</p>
-    <button class="cta-btn fade-in" onclick="openBetaModal()">Get Early Access</button>
-    <p class="slots-counter fade-in"><span class="slots-num" id="cta-slots">847</span> / 1,000 slots left</p>
+    <p class="section-sub fade-in" style="margin-left:auto;margin-right:auto;">Download AutoStrike Golf and start tracking your next round.</p>
+    <a class="cta-btn fade-in" href="https://app.autostrikegolf.com">Download on the App Store</a>
     <p class="note fade-in">iPhone only · iOS 17+</p>
   </div>
 </section>
-
-<!-- Early access signup modal -->
-<div class="modal-overlay" id="beta-modal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeBetaModal()">✕</button>
-    <h2>Get <span class="gold">Early Access</span></h2>
-    <p>Enter your email and we'll send you an invite code when your slot opens.</p>
-    <form id="beta-form" onsubmit="submitBeta(event)">
-      <input type="email" id="beta-email" placeholder="your@email.com" required>
-      <button type="submit" class="cta-btn submit-btn" id="beta-submit">Get My Invite</button>
-    </form>
-    <p class="modal-note" id="beta-status"></p>
-  </div>
-</div>
 
 <footer>
   <p>&copy; 2026 AutoStrike Golf. All rights reserved. · <a href="/privacy.html" style="color:var(--text-muted)">Privacy</a> · <a href="/support.html" style="color:var(--text-muted)">Support</a></p>
