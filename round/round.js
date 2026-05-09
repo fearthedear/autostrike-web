@@ -1,4 +1,4 @@
-const APP_STORE_URL = 'https://app.autostrikegolf.com';
+const APP_STORE_URL = 'https://apps.apple.com/us/app/autostrike-golf/id6762587973';
 
 const root = document.getElementById('round-root');
 const roundId = new URLSearchParams(window.location.search).get('id')?.trim() || '';
