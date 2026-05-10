@@ -65,10 +65,10 @@ export async function onRequestGet({ request, env }) {
   return jsonResponse({ round: normalizeRound(row) });
 }
 
-export async function onRequestOptions() {
+export async function onRequestOptions({ request }) {
   return new Response(null, {
     status: 204,
-    headers: corsHeaders(),
+    headers: corsHeaders(request),
   });
 }
 
@@ -119,17 +119,26 @@ function jsonResponse(payload, status = 200) {
   return new Response(JSON.stringify(payload), {
     status,
     headers: {
-      ...corsHeaders(),
+      ...corsHeaders(request),
       'content-type': 'application/json; charset=utf-8',
       'cache-control': 'no-store',
     },
   });
 }
 
-function corsHeaders() {
+const ALLOWED_WEB_ORIGINS = [
+  'https://autostrikegolf.com',
+  'https://www.autostrikegolf.com',
+  'https://dashboard.autostrikegolf.com',
+];
+
+function corsHeaders(request) {
+  const origin = request?.headers?.get?.('origin') || '';
+  const allowed = ALLOWED_WEB_ORIGINS.includes(origin) ? origin : ALLOWED_WEB_ORIGINS[0];
   return {
-    'access-control-allow-origin': '*',
+    'access-control-allow-origin': allowed,
     'access-control-allow-methods': 'GET, OPTIONS',
     'access-control-allow-headers': 'content-type',
+    'vary': 'Origin',
   };
 }

@@ -1,5 +1,5 @@
 // ── Live course search (autostrike-dashboard catalog API) ──
-const API_BASE = 'https://autostrike-dashboard.vercel.app';
+const API_BASE = 'https://dashboard.autostrikegolf.com';
 const PAGE_SIZE = 10;
 let searchDebounce = null;
 let searchSeq = 0;        // discard out-of-order responses
