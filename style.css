@@ -386,6 +386,7 @@ footer {
 }
 
 /* Download modal extras */
-.modal-qr { width: 200px; height: 200px; margin: 0 auto 20px; display: block; }
+.modal-qr-wrap { background: white; padding: 14px; border-radius: 12px; display: inline-block; margin: 0 auto 20px; }
+.modal-qr { width: 200px; height: 200px; display: block; }
 .app-store-badge { width: 180px; display: block; margin: 0 auto; }
 .modal-overlay { z-index: 9999; }
