@@ -64,11 +64,15 @@ nav {
   width: 350px; height: 350px; border-radius: 50%;
   background: rgba(56,170,56,.2); filter: blur(100px);
 }
-.hero-content { max-width: 720px; }
+.hero-content { max-width: 1000px; }
 .hero h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 800; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 16px; }
 .hero h1 .gold { color: var(--gold); }
 .hero .tagline { font-size: clamp(1.1rem, 2.5vw, 1.5rem); color: var(--text-muted); margin-bottom: 40px; }
-.device-row { display: flex; align-items: center; justify-content: center; gap: 32px; margin-bottom: 8px; }
+.hero-layout { display: flex; align-items: center; justify-content: center; gap: 60px; }
+.hero-cta-col { display: flex; flex-direction: column; align-items: flex-start; }
+.hero-cta-col .cta-btn { margin-bottom: 12px; }
+.hero-cta-col .note { margin: 0; }
+.device-row { display: flex; align-items: center; justify-content: center; gap: 24px; }
 .device-phone {
   line-height: 0;
 }
@@ -80,7 +84,7 @@ nav {
   content: none;
 }
 .device-watch img {
-  width: 180px; display: block;
+  width: 220px; display: block;
 }
 .hero-cta { margin-top: 36px; }
 .slots-counter { color: var(--text-muted); font-size: .9rem; margin-top: 12px; }
@@ -374,7 +378,9 @@ footer {
   .course-stats { gap: 24px; }
   .modal { padding: 28px; }
   .price-cards { grid-template-columns: 1fr; max-width: 380px; }
-  .device-row { flex-direction: column; gap: 24px; }
-  .device-phone img { width: 250px; }
+  .hero-layout { flex-direction: column; gap: 32px; }
+  .hero-cta-col { align-items: center; }
+  .device-row { flex-direction: row; gap: 16px; }
+  .device-phone img { width: 200px; }
   .device-watch img { width: 140px; }
 }
