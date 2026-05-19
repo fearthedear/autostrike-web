@@ -28,7 +28,7 @@ body {
 
 /* NAV */
 nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  position: fixed; top: 51px; left: 0; right: 0; z-index: 100;
   background: rgba(13,17,23,.85);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(201,169,110,.15);
@@ -50,7 +50,7 @@ nav {
 /* HERO */
 .hero {
   min-height: 100vh; display: flex; align-items: center; justify-content: center;
-  text-align: center; padding: 120px 24px 80px;
+  text-align: center; padding: 170px 24px 80px;
   background: radial-gradient(ellipse at 50% 0%, rgba(42,140,42,.5) 0%, rgba(22,86,22,.3) 40%, var(--bg-primary) 70%);
   position: relative; overflow: hidden;
 }
@@ -394,6 +394,7 @@ footer {
 
 /* Promo banner */
 .promo-banner {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 150;
   background: linear-gradient(90deg, #1a2e1f 0%, #0e1310 100%);
   border-bottom: 1px solid var(--gold-dim);
   padding: 10px 20px;
