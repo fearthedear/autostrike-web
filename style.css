@@ -398,11 +398,23 @@ footer {
   position: fixed; top: 0; left: 0; right: 0; z-index: 150;
   background: linear-gradient(90deg, #1a2e1f 0%, #0e1310 100%);
   border-bottom: 1px solid var(--gold-dim);
-  padding: 10px 20px;
-  display: flex; align-items: center; justify-content: center; gap: 16px;
-  font-size: .9rem;
-  flex-wrap: wrap;
-  text-align: center;
+  padding: 10px 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.promo-banner-inner {
+  display: inline-flex; align-items: center; gap: 40px;
+  animation: marquee 20s linear infinite;
+  padding-left: 100%;
+}
+.promo-banner-inner:hover { animation-play-state: paused; }
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.promo-item {
+  display: inline-flex; align-items: center; gap: 16px;
+  font-size: .9rem; flex-shrink: 0;
 }
 .promo-text { color: var(--text); }
 .promo-slots { color: var(--gold); font-weight: 700; }
