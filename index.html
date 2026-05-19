@@ -38,7 +38,7 @@
 
 <div class="promo-banner" id="promo-banner">
   <span class="promo-text">🔥 <strong>Limited offer:</strong> first 1,000 users get <strong>free lifetime access</strong> — <span class="promo-slots">~80 spots left</span></span>
-  <button class="promo-btn" onclick="openDownloadModal(event)">Claim Now</button>
+  <button class="promo-btn" onclick="openDownloadModal(event, true)">Claim Now</button>
 </div>
 
 <nav>
@@ -271,7 +271,7 @@
     <a href="https://apps.apple.com/us/app/autostrike-golf/id6762587973" target="_blank" rel="noopener">
       <img src="app-store-badge.svg" alt="Download on the App Store" class="app-store-badge">
     </a>
-    <div class="modal-premium-claim">
+    <div class="modal-premium-claim" id="modal-premium-section" style="display:none">
       <p class="modal-premium-label">🎁 Claim your free lifetime premium access</p>
       <form id="premium-claim-form" onsubmit="submitPremiumClaim(event)">
         <input type="email" id="premium-email" placeholder="your@email.com" required>

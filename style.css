@@ -337,6 +337,7 @@ section { padding: 100px 24px; }
   max-width: 440px; width: 90%; position: relative;
   border: 1px solid rgba(201,169,110,.2);
   box-shadow: 0 24px 64px rgba(0,0,0,.5);
+  text-align: center;
 }
 .modal-close {
   position: absolute; top: 16px; right: 16px; background: none; border: none;
@@ -416,9 +417,9 @@ footer {
   border-top: 1px solid var(--gold-dim);
 }
 .modal-premium-label { font-weight: 600; margin-bottom: 10px; font-size: .95rem; }
-#premium-claim-form { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+#premium-claim-form { display: flex; flex-direction: column; gap: 10px; align-items: center; }
 #premium-email {
-  flex: 1; min-width: 200px; padding: 10px 14px;
+  width: 100%; max-width: 320px; padding: 12px 14px;
   background: #0e1310; color: var(--text);
   border: 1px solid var(--gold-dim); border-radius: 8px; font-size: .9rem;
 }

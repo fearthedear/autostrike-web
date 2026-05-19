@@ -185,8 +185,10 @@ if (pagerNext) pagerNext.addEventListener('click', () => {
 runQuery();   // shows the default empty hint, no list
 
 // ── Download modal ──
-function openDownloadModal(event) {
+function openDownloadModal(event, showPremium) {
   if (event) event.preventDefault();
+  var premiumSection = document.getElementById('modal-premium-section');
+  if (premiumSection) premiumSection.style.display = showPremium ? '' : 'none';
   document.getElementById('download-modal').classList.add('open');
 }
 function closeDownloadModal(event) {
