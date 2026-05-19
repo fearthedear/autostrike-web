@@ -69,8 +69,8 @@ nav {
 .hero h1 .gold { color: var(--gold); }
 .hero .tagline { font-size: clamp(1.1rem, 2.5vw, 1.5rem); color: var(--text-muted); margin-bottom: 40px; }
 .hero-layout { display: flex; align-items: center; justify-content: center; gap: 60px; }
-.hero-cta-col { display: flex; flex-direction: column; align-items: flex-start; }
-.hero-cta-col .cta-btn { margin-bottom: 12px; }
+.hero-cta-col { display: flex; flex-direction: column; align-items: center; }
+.hero-cta-col .cta-btn { margin-bottom: 4px; }
 .hero-cta-col .note { margin: 0; }
 .device-row { display: flex; align-items: center; justify-content: center; gap: 24px; }
 .device-phone {
@@ -446,7 +446,7 @@ footer {
 
 /* Rounds counter */
 .rounds-counter {
-  color: var(--text-muted); font-size: .9rem; margin-top: 8px; text-align: center;
+  color: var(--text-muted); font-size: .9rem; margin-top: 4px; text-align: center;
 }
 #rounds-count { color: var(--gold); font-weight: 700; }
 
