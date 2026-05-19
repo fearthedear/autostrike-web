@@ -396,8 +396,8 @@ footer {
 /* Promo banner */
 .promo-banner {
   position: fixed; top: 0; left: 0; right: 0; z-index: 150;
-  background: linear-gradient(90deg, #1a2e1f 0%, #0e1310 100%);
-  border-bottom: 1px solid var(--gold-dim);
+  background: linear-gradient(90deg, #8b1a1a 0%, #c0392b 50%, #8b1a1a 100%);
+  border-bottom: 1px solid rgba(255,100,100,.4);
   padding: 10px 0;
   overflow: hidden;
   white-space: nowrap;
