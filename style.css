@@ -50,7 +50,7 @@ nav {
 /* HERO */
 .hero {
   min-height: 100vh; display: flex; align-items: center; justify-content: center;
-  padding: 140px 40px 60px;
+  padding: 130px 40px 40px;
   background: radial-gradient(ellipse at 50% 0%, rgba(42,140,42,.5) 0%, rgba(22,86,22,.3) 40%, var(--bg-primary) 70%);
   position: relative; overflow: hidden;
 }
@@ -78,7 +78,7 @@ nav {
 .device-phone {
   line-height: 0;
 }
-.device-phone img { width: 420px; display: block; }
+.device-phone img { width: 420px; max-height: 55vh; object-fit: contain; display: block; }
 .device-watch {
   display: flex; flex-direction: column; align-items: center;
 }
@@ -86,7 +86,7 @@ nav {
   content: none;
 }
 .device-watch img {
-  width: 220px; display: block;
+  width: 220px; max-height: 40vh; object-fit: contain; display: block;
 }
 .hero-cta { margin-top: 36px; }
 .slots-counter { color: var(--text-muted); font-size: .9rem; margin-top: 12px; }
