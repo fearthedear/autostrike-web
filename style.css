@@ -50,7 +50,7 @@ nav {
 /* HERO */
 .hero {
   min-height: 100vh; display: flex; align-items: center; justify-content: center;
-  text-align: center; padding: 170px 24px 80px;
+  padding: 140px 40px 60px;
   background: radial-gradient(ellipse at 50% 0%, rgba(42,140,42,.5) 0%, rgba(22,86,22,.3) 40%, var(--bg-primary) 70%);
   position: relative; overflow: hidden;
 }
@@ -64,15 +64,16 @@ nav {
   width: 350px; height: 350px; border-radius: 50%;
   background: rgba(56,170,56,.2); filter: blur(100px);
 }
-.hero-content { max-width: 1000px; }
+.hero-content { max-width: 1200px; width: 100%; }
+.hero-split { display: flex; align-items: center; gap: 60px; }
+.hero-left { flex: 1; text-align: left; }
+.hero-right { flex: 1; display: flex; justify-content: center; }
 .hero h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 800; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 16px; }
 .hero-promise { font-size: clamp(1.1rem, 2.5vw, 1.4rem); color: var(--gold); font-weight: 600; margin-bottom: 12px; letter-spacing: .5px; }
 .hero h1 .gold { color: var(--gold); }
-.hero .tagline { font-size: clamp(1rem, 2vw, 1.2rem); color: var(--text-muted); margin-bottom: 40px; max-width: 540px; margin-left: auto; margin-right: auto; line-height: 1.5; }
-.hero-layout { display: flex; align-items: center; justify-content: center; gap: 60px; }
-.hero-cta-col { display: flex; flex-direction: column; align-items: center; }
-.hero-cta-col .cta-btn { margin-bottom: 4px; }
-.hero-cta-col .note { margin: 0; }
+.hero .tagline { font-size: clamp(1rem, 2vw, 1.2rem); color: var(--text-muted); margin-bottom: 28px; max-width: 480px; line-height: 1.5; }
+.hero-left .cta-btn { margin-bottom: 4px; }
+.hero-left .rounds-counter { margin-top: 4px; }
 .device-row { display: flex; align-items: center; justify-content: center; gap: 24px; }
 .device-phone {
   line-height: 0;
@@ -380,8 +381,9 @@ footer {
   .course-stats { gap: 24px; }
   .modal { padding: 28px; }
   .price-cards { grid-template-columns: 1fr; max-width: 380px; }
-  .hero-layout { flex-direction: column; gap: 32px; }
-  .hero-cta-col { align-items: center; }
+  .hero-split { flex-direction: column; gap: 32px; }
+  .hero-left { text-align: center; }
+  .award-badge { justify-content: center; }
   .device-row { flex-direction: row; gap: 16px; }
   .device-phone img { width: 260px; }
   .device-watch img { width: 220px; }
@@ -441,16 +443,16 @@ footer {
 
 /* Award badge */
 .award-badge {
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: center; justify-content: flex-start;
   margin-bottom: 20px;
 }
 .award-badge::before, .award-badge::after {
-  content: ''; display: inline-block; width: 90px; height: 90px;
+  content: ''; display: inline-block; width: 120px; height: 120px;
   background: url('laurel.svg') center/contain no-repeat;
   flex-shrink: 0;
 }
-.award-badge::before { clip-path: inset(0 50% 0 0); margin-right: -45px; }
-.award-badge::after { clip-path: inset(0 0 0 50%); margin-left: -45px; }
+.award-badge::before { clip-path: inset(0 50% 0 0); margin-right: -60px; }
+.award-badge::after { clip-path: inset(0 0 0 50%); margin-left: -60px; }
 .award-text {
   display: flex; flex-direction: column; align-items: center;
 }
