@@ -66,8 +66,9 @@ nav {
 }
 .hero-content { max-width: 1000px; }
 .hero h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 800; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 16px; }
+.hero-promise { font-size: clamp(1.1rem, 2.5vw, 1.4rem); color: var(--gold); font-weight: 600; margin-bottom: 12px; letter-spacing: .5px; }
 .hero h1 .gold { color: var(--gold); }
-.hero .tagline { font-size: clamp(1.1rem, 2.5vw, 1.5rem); color: var(--text-muted); margin-bottom: 40px; }
+.hero .tagline { font-size: clamp(1rem, 2vw, 1.2rem); color: var(--text-muted); margin-bottom: 40px; max-width: 540px; margin-left: auto; margin-right: auto; line-height: 1.5; }
 .hero-layout { display: flex; align-items: center; justify-content: center; gap: 60px; }
 .hero-cta-col { display: flex; flex-direction: column; align-items: center; }
 .hero-cta-col .cta-btn { margin-bottom: 4px; }
