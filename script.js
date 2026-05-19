@@ -196,3 +196,41 @@ function closeDownloadModal(event) {
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeDownloadModal();
 });
+
+// ── Premium claim ──
+async function submitPremiumClaim(event) {
+  event.preventDefault();
+  const emailInput = document.getElementById('premium-email');
+  const statusEl = document.getElementById('premium-status');
+  const submitBtn = document.getElementById('premium-submit');
+  const email = (emailInput.value || '').trim();
+  if (!email) return;
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Claiming...';
+  statusEl.textContent = '';
+  statusEl.className = 'modal-note';
+
+  try {
+    const res = await fetch(`${API_BASE}/api/premium-claim`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      statusEl.textContent = '✓ Claimed! Check your email for premium access details.';
+      statusEl.className = 'modal-note success';
+      emailInput.value = '';
+    } else {
+      statusEl.textContent = data.error || 'Something went wrong. Try again.';
+      statusEl.className = 'modal-note error';
+    }
+  } catch (e) {
+    statusEl.textContent = 'Network error. Please try again.';
+    statusEl.className = 'modal-note error';
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Claim Free Access';
+  }
+}

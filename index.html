@@ -36,6 +36,11 @@
 </head>
 <body>
 
+<div class="promo-banner" id="promo-banner">
+  <span class="promo-text">🔥 <strong>Limited offer:</strong> first 1,000 users get <strong>free lifetime access</strong> — <span class="promo-slots">~80 spots left</span></span>
+  <button class="promo-btn" onclick="openDownloadModal(event)">Claim Now</button>
+</div>
+
 <nav>
   <div class="nav-inner">
     <a href="#" class="logo"><img src="logo.webp" alt="AutoStrike" class="logo-img"><span class="logo-text">AutoStrike <span class="gold">Golf</span></span></a>
@@ -57,9 +62,6 @@
     <p class="tagline">Auto Shot Tracking · GPS Distances · Live Scoring</p>
 
     <div class="hero-layout">
-      <div class="hero-cta-col">
-        <a class="cta-btn" href="#" onclick="openDownloadModal(event)">Download on the App Store</a>
-      </div>
       <div class="device-row">
         <div class="device-phone">
           <img src="phone-mockup.webp" alt="AutoStrike Golf on iPhone">
@@ -67,6 +69,9 @@
         <div class="device-watch">
           <img src="watch-mockup.webp" alt="AutoStrike Golf on Apple Watch">
         </div>
+      </div>
+      <div class="hero-cta-col">
+        <a class="cta-btn" href="#" onclick="openDownloadModal(event)">Download on the App Store</a>
       </div>
     </div>
     <p class="scroll-hint">↓ Scroll to explore</p>
@@ -259,6 +264,14 @@
     <a href="https://apps.apple.com/us/app/autostrike-golf/id6762587973" target="_blank" rel="noopener">
       <img src="app-store-badge.svg" alt="Download on the App Store" class="app-store-badge">
     </a>
+    <div class="modal-premium-claim">
+      <p class="modal-premium-label">🎁 Claim your free lifetime premium access</p>
+      <form id="premium-claim-form" onsubmit="submitPremiumClaim(event)">
+        <input type="email" id="premium-email" placeholder="your@email.com" required>
+        <button type="submit" class="cta-btn premium-submit-btn" id="premium-submit">Claim Free Access</button>
+      </form>
+      <p class="modal-note" id="premium-status">Your premium access will be sent to this email address.</p>
+    </div>
   </div>
 </div>
 
