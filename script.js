@@ -183,3 +183,16 @@ if (pagerNext) pagerNext.addEventListener('click', () => {
 
 // ── Init ──
 runQuery();   // shows the default empty hint, no list
+
+// ── Download modal ──
+function openDownloadModal(event) {
+  if (event) event.preventDefault();
+  document.getElementById('download-modal').classList.add('open');
+}
+function closeDownloadModal(event) {
+  if (event && event.target !== event.currentTarget) return;
+  document.getElementById('download-modal').classList.remove('open');
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeDownloadModal();
+});

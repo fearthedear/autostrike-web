@@ -384,3 +384,8 @@ footer {
   .device-phone img { width: 200px; }
   .device-watch img { width: 140px; }
 }
+
+/* Download modal extras */
+.modal-qr { width: 200px; height: 200px; margin: 0 auto 20px; display: block; }
+.app-store-badge { width: 180px; display: block; margin: 0 auto; }
+.modal-overlay { z-index: 9999; }

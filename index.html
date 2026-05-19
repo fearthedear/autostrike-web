@@ -8,6 +8,31 @@
   <link rel="stylesheet" href="style.css">
   <link rel="icon" type="image/png" href="logo-64.png">
   <link rel="apple-touch-icon" href="logo-64.png">
+  <link rel="canonical" href="https://autostrike.golf/">
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="AutoStrike Golf — GPS Golf Companion">
+  <meta property="og:description" content="Real-time GPS distances, handicap tracking, and multiplayer scoring for golf courses worldwide.">
+  <meta property="og:url" content="https://autostrike.golf/">
+  <meta property="og:image" content="https://autostrike.golf/logo.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AutoStrike Golf — GPS Golf Companion">
+  <meta name="twitter:description" content="Real-time GPS distances, handicap tracking, and multiplayer scoring for golf courses worldwide.">
+  <meta name="robots" content="index, follow">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "MobileApplication",
+    "name": "AutoStrike Golf",
+    "operatingSystem": "iOS",
+    "applicationCategory": "SportsApplication",
+    "description": "Real-time GPS distances, handicap tracking on World Handicap System rules, and multiplayer scoring for golf courses worldwide.",
+    "url": "https://autostrike.golf",
+    "downloadUrl": "https://apps.apple.com/us/app/autostrike-golf/id6762587973",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "aggregateRating": { "@type": "AggregateRating", "ratingValue": "5", "ratingCount": "1" }
+  }
+  </script>
 </head>
 <body>
 
@@ -33,8 +58,7 @@
 
     <div class="hero-layout">
       <div class="hero-cta-col">
-        <a class="cta-btn" href="https://apps.apple.com/us/app/autostrike-golf/id6762587973">Download on the App Store</a>
-        <p class="note">iPhone only · iOS 17+</p>
+        <a class="cta-btn" href="#" onclick="openDownloadModal(event)">Download on the App Store</a>
       </div>
       <div class="device-row">
         <div class="device-phone">
@@ -78,7 +102,7 @@
       <div class="feature-card fade-in">
         <span class="feature-icon">📊</span>
         <h3>Handicap Tracking</h3>
-        <p>Automatic WHS handicap index calculation from your recorded rounds.</p>
+        <p>Handicap calculation on World Handicap System rules from your recorded rounds.</p>
       </div>
       <div class="feature-card fade-in">
         <span class="feature-icon">✏️</span>
@@ -147,7 +171,7 @@
       <ul class="handi-list fade-in">
         <li>
           <span class="icon">🎯</span>
-          <div><h4>WHS Compliant</h4><p>Automatic handicap calculation following World Handicap System rules.</p></div>
+          <div><h4>Handicap Calculation</h4><p>Handicap calculation on World Handicap System rules.</p></div>
         </li>
         <li>
           <span class="icon">📉</span>
@@ -218,14 +242,25 @@
     <p class="section-label fade-in">Get Started</p>
     <h2 class="section-title fade-in">Ready to level up your game?</h2>
     <p class="section-sub fade-in" style="margin-left:auto;margin-right:auto;">Download AutoStrike Golf and start tracking your next round.</p>
-    <a class="cta-btn fade-in" href="https://apps.apple.com/us/app/autostrike-golf/id6762587973">Download on the App Store</a>
-    <p class="note fade-in">iPhone only · iOS 17+</p>
+    <a class="cta-btn fade-in" href="#" onclick="openDownloadModal(event)">Download on the App Store</a>
   </div>
 </section>
 
 <footer>
   <p>&copy; 2026 AutoStrike Golf. All rights reserved. · <a href="/privacy.html" style="color:var(--text-muted)">Privacy</a> · <a href="/terms" style="color:var(--text-muted)">Terms</a> · <a href="/support.html" style="color:var(--text-muted)">Support</a></p>
 </footer>
+
+<div class="modal-overlay" id="download-modal" onclick="closeDownloadModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeDownloadModal()">&times;</button>
+    <h2><span class="gold">AutoStrike</span> Golf</h2>
+    <p>Scan with your iPhone camera to download</p>
+    <img src="qr-appstore.svg" alt="QR Code for App Store" class="modal-qr">
+    <a href="https://apps.apple.com/us/app/autostrike-golf/id6762587973" target="_blank" rel="noopener">
+      <img src="app-store-badge.svg" alt="Download on the App Store" class="app-store-badge">
+    </a>
+  </div>
+</div>
 
 <script src="script.js"></script>
 </body>
