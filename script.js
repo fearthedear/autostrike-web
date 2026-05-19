@@ -294,7 +294,7 @@ async function submitPremiumClaim(event) {
     setTimeout(() => {
       toast.classList.remove('social-toast--visible');
       setTimeout(() => toast.remove(), 400);
-    }, 5000);
+    }, 15000);
 
     localStorage.setItem(STORAGE_KEY, today);
   }
