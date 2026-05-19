@@ -28,7 +28,7 @@ body {
 
 /* NAV */
 nav {
-  position: fixed; top: 51px; left: 0; right: 0; z-index: 100;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   background: rgba(13,17,23,.85);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(201,169,110,.15);
