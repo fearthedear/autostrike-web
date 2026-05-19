@@ -65,16 +65,16 @@ nav {
   background: rgba(56,170,56,.2); filter: blur(100px);
 }
 .hero-content { max-width: 1200px; width: 100%; }
-.hero-split { display: flex; align-items: center; gap: 60px; }
-.hero-left { flex: 1; text-align: left; }
-.hero-right { flex: 1; display: flex; justify-content: center; }
+.hero-split { display: flex; align-items: center; gap: 40px; }
+.hero-left { flex: 1; text-align: left; max-width: 500px; }
+.hero-right { flex: 1; display: flex; justify-content: center; align-items: center; }
 .hero h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 800; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 16px; }
-.hero-promise { font-size: clamp(1.1rem, 2.5vw, 1.4rem); color: var(--gold); font-weight: 600; margin-bottom: 12px; letter-spacing: .5px; }
+.hero-promise { font-size: clamp(1.1rem, 2.5vw, 1.4rem); color: #ffffff; font-weight: 600; margin-bottom: 12px; letter-spacing: .5px; }
 .hero h1 .gold { color: var(--gold); }
 .hero .tagline { font-size: clamp(1rem, 2vw, 1.2rem); color: var(--text-muted); margin-bottom: 28px; max-width: 480px; line-height: 1.5; }
 .hero-left .cta-btn { margin-bottom: 4px; }
 .hero-left .rounds-counter { margin-top: 4px; }
-.device-row { display: flex; align-items: center; justify-content: center; gap: 24px; }
+.device-row { display: flex; align-items: flex-end; justify-content: center; gap: 16px; }
 .device-phone {
   line-height: 0;
 }
