@@ -428,23 +428,21 @@ footer {
 
 /* Award badge */
 .award-badge {
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 20px; position: relative;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-bottom: 20px;
 }
-.laurel-left, .laurel-right { display: none; }
-.award-badge::before {
-  content: ''; position: absolute; inset: 0;
+.award-badge::before, .award-badge::after {
+  content: ''; display: inline-block; width: 36px; height: 50px;
   background: url('laurel.svg') center/contain no-repeat;
-  width: 100%; height: 100%;
-  pointer-events: none;
 }
+.award-badge::before { clip-path: inset(0 50% 0 0); margin-right: -18px; }
+.award-badge::after { clip-path: inset(0 0 0 50%); margin-left: -18px; }
 .award-text {
   display: flex; flex-direction: column; align-items: center;
-  padding: 12px 40px;
-  position: relative;
 }
-.award-title { font-size: .9rem; font-weight: 700; color: var(--text); letter-spacing: .5px; }
-.award-stars { color: var(--gold); font-size: 1.2rem; letter-spacing: 2px; margin-top: 4px; }
+.award-title { font-size: .9rem; font-weight: 700; letter-spacing: .5px; }
+.award-stars { font-size: 1.2rem; letter-spacing: 2px; margin-top: 4px; }
+.award-title, .award-stars { color: var(--gold); }
 
 /* Rounds counter */
 .rounds-counter {
