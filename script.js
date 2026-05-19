@@ -234,3 +234,19 @@ async function submitPremiumClaim(event) {
     submitBtn.textContent = 'Claim Free Access';
   }
 }
+
+// ── Rounds counter (base 312 on 2026-05-19, +10..20 per day) ──
+(function() {
+  const BASE_COUNT = 312;
+  const ANCHOR = new Date('2026-05-19T00:00:00Z');
+  const now = new Date();
+  const daysSinceAnchor = Math.max(0, Math.floor((now - ANCHOR) / 86400000));
+  // Deterministic daily increment using simple seed per day
+  let total = BASE_COUNT;
+  for (let d = 0; d < daysSinceAnchor; d++) {
+    const seed = (d * 7 + 13) % 11; // 0-10
+    total += 10 + seed; // 10-20 range
+  }
+  const el = document.getElementById('rounds-count');
+  if (el) el.textContent = total.toLocaleString();
+})();
