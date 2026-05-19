@@ -428,15 +428,16 @@ footer {
 
 /* Award badge */
 .award-badge {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
+  display: flex; align-items: center; justify-content: center;
   margin-bottom: 20px;
 }
 .award-badge::before, .award-badge::after {
-  content: ''; display: inline-block; width: 56px; height: 70px;
+  content: ''; display: inline-block; width: 90px; height: 90px;
   background: url('laurel.svg') center/contain no-repeat;
+  flex-shrink: 0;
 }
-.award-badge::before { clip-path: inset(0 50% 0 0); margin-right: -28px; }
-.award-badge::after { clip-path: inset(0 0 0 50%); margin-left: -28px; }
+.award-badge::before { clip-path: inset(0 50% 0 0); margin-right: -45px; }
+.award-badge::after { clip-path: inset(0 0 0 50%); margin-left: -45px; }
 .award-text {
   display: flex; flex-direction: column; align-items: center;
 }
