@@ -382,7 +382,7 @@ footer {
   .hero-cta-col { align-items: center; }
   .device-row { flex-direction: row; gap: 16px; }
   .device-phone img { width: 200px; }
-  .device-watch img { width: 140px; }
+  .device-watch img { width: 180px; }
 }
 
 /* Download modal extras */
