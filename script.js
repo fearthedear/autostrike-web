@@ -250,3 +250,53 @@ async function submitPremiumClaim(event) {
   const el = document.getElementById('rounds-count');
   if (el) el.textContent = total.toLocaleString();
 })();
+
+// ── Social proof popup (bottom-left toast) ──
+(function() {
+  const STORAGE_KEY = 'autostrike-toast-shown';
+  const today = new Date().toISOString().slice(0, 10);
+  if (localStorage.getItem(STORAGE_KEY) === today) return;
+
+  const domains = ['gmail.com','yahoo.com','outlook.com','hotmail.com','icloud.com','proton.me','live.com','aol.com','me.com','mail.com'];
+  const names = ['j','m','k','s','a','d','r','t','n','p','c','l','b','e','w'];
+
+  function randomEmail() {
+    const n = names[Math.floor(Math.random() * names.length)];
+    const stars = '***';
+    const d = domains[Math.floor(Math.random() * domains.length)];
+    return `${n}${stars}@${d}`;
+  }
+
+  function getSlotsLeft() {
+    const bannerEl = document.querySelector('.promo-slots');
+    if (!bannerEl) return 80;
+    const m = bannerEl.textContent.match(/(\d+)/);
+    return m ? parseInt(m[1], 10) : 80;
+  }
+
+  function showToast() {
+    const slots = getSlotsLeft();
+    const newSlots = Math.max(1, slots - 1);
+
+    // Update banner
+    const bannerEl = document.querySelector('.promo-slots');
+    if (bannerEl) bannerEl.textContent = `~${newSlots} spots left`;
+
+    const toast = document.createElement('div');
+    toast.className = 'social-toast';
+    toast.innerHTML = `<span class="social-toast-icon">🎉</span><span><strong>${randomEmail()}</strong> just claimed Premium!<br><small>${newSlots} slots left</small></span>`;
+    document.body.appendChild(toast);
+
+    requestAnimationFrame(() => toast.classList.add('social-toast--visible'));
+
+    setTimeout(() => {
+      toast.classList.remove('social-toast--visible');
+      setTimeout(() => toast.remove(), 400);
+    }, 5000);
+
+    localStorage.setItem(STORAGE_KEY, today);
+  }
+
+  const delay = (Math.random() * 30 + 10) * 1000; // 10-40s
+  setTimeout(showToast, delay);
+})();

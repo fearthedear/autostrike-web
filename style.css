@@ -443,3 +443,19 @@ footer {
   color: var(--text-muted); font-size: .9rem; margin-top: 14px;
 }
 #rounds-count { color: var(--gold); font-weight: 700; }
+
+/* Social proof toast */
+.social-toast {
+  position: fixed; bottom: 24px; left: 24px;
+  background: var(--bg-card); border: 1px solid var(--gold-dim);
+  border-radius: 12px; padding: 14px 20px;
+  display: flex; align-items: center; gap: 12px;
+  font-size: .88rem; color: var(--text);
+  box-shadow: 0 8px 32px rgba(0,0,0,.5);
+  transform: translateY(120%); opacity: 0;
+  transition: transform .4s ease, opacity .4s ease;
+  z-index: 9000; max-width: 340px;
+}
+.social-toast--visible { transform: translateY(0); opacity: 1; }
+.social-toast-icon { font-size: 1.4rem; }
+.social-toast small { color: var(--gold); font-weight: 600; }
