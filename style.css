@@ -73,24 +73,23 @@ nav {
 .hero-promise { font-size: clamp(1.05rem, 2vw, 1.35rem); color: #ffffff; font-weight: 600; margin-bottom: 12px; letter-spacing: .5px; }
 .hero h1 .gold { color: var(--gold); }
 .hero .tagline { font-size: clamp(1rem, 1.6vw, 1.15rem); color: var(--text-muted); margin-bottom: 24px; max-width: 500px; line-height: 1.5; }
-.hero-left .cta-btn { margin-bottom: 4px; }
-.hero-left .rounds-counter { margin-top: 4px; }
+.hero-left .cta-btn { margin-bottom: 4px; display: block; text-align: center; }
+.hero-left .rounds-counter { margin-top: 4px; text-align: center; }
 .device-row {
   width: min(100%, 600px);
   display: flex; align-items: center; justify-content: center; gap: clamp(18px, 3vw, 34px);
 }
 .device-phone { line-height: 0; flex: 0 1 380px; }
-.device-phone img { width: min(100%, 380px); max-height: calc(100svh - 190px); object-fit: contain; display: block; }
+.device-phone img { width: auto; height: clamp(350px, 60vh, 700px); object-fit: contain; display: block; }
 .device-watch {
   display: flex; flex-direction: column; align-items: center;
-  flex: 0 0 clamp(150px, 15vw, 200px);
   transform: translateY(8px);
 }
 .device-watch::before, .device-watch::after {
   content: none;
 }
 .device-watch img {
-  width: min(100%, 200px); max-height: min(32vh, 210px); object-fit: contain; display: block;
+  width: auto; height: clamp(200px, 38vh, 420px); object-fit: contain; display: block;
 }
 .hero-cta { margin-top: 36px; }
 .slots-counter { color: var(--text-muted); font-size: .9rem; margin-top: 12px; }
@@ -393,9 +392,9 @@ footer {
   .rounds-counter { text-align: center; }
   .device-row { width: min(100%, 420px); flex-direction: row; gap: 14px; }
   .device-phone { flex-basis: 250px; }
-  .device-phone img { width: min(100%, 250px); max-height: none; }
+  .device-phone img { width: 220px; height: auto; }
   .device-watch { flex-basis: 150px; transform: translateY(4px); }
-  .device-watch img { width: min(100%, 150px); max-height: none; }
+  .device-watch img { width: 150px; height: auto; }
 }
 
 /* Download modal extras */
