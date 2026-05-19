@@ -13,7 +13,7 @@ async function fetchCourses(q, offset) {
   if (selectedCountry) params.set('country', selectedCountry);
   params.set('limit', String(PAGE_SIZE));
   params.set('offset', String(offset || 0));
-  const res = await fetch(`${API_BASE}/api/unmapped-courses?${params.toString()}`);
+  const res = await fetch(`${API_BASE}/api/catalog?${params.toString()}`);
   if (!res.ok) throw new Error('search failed');
   return res.json();
 }
