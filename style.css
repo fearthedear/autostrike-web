@@ -77,7 +77,7 @@ nav {
 .device-phone {
   line-height: 0;
 }
-.device-phone img { width: 300px; display: block; }
+.device-phone img { width: 420px; display: block; }
 .device-watch {
   display: flex; flex-direction: column; align-items: center;
 }
@@ -383,8 +383,8 @@ footer {
   .hero-layout { flex-direction: column; gap: 32px; }
   .hero-cta-col { align-items: center; }
   .device-row { flex-direction: row; gap: 16px; }
-  .device-phone img { width: 200px; }
-  .device-watch img { width: 180px; }
+  .device-phone img { width: 260px; }
+  .device-watch img { width: 220px; }
 }
 
 /* Download modal extras */
