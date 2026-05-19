@@ -405,7 +405,6 @@ footer {
 .promo-banner-inner {
   display: inline-flex; align-items: center; gap: 40px;
   animation: marquee 20s linear infinite;
-  padding-left: 100%;
 }
 .promo-banner-inner:hover { animation-play-state: paused; }
 @keyframes marquee {
