@@ -81,6 +81,7 @@ nav {
   font-size: clamp(.95rem, 1.4vw, 1.1rem); color: var(--text);
   line-height: 1.5; font-weight: 500;
 }
+.feat-short { display: none; }
 .hero-left .cta-btn { display: inline-flex; align-items: center; justify-content: center; margin: 6px 0 0; min-width: 286px; text-align: center; }
 .hero-left .rounds-counter { width: 286px; max-width: 100%; margin-top: 12px; text-align: center; }
 .device-row {
@@ -395,9 +396,13 @@ footer {
   .price-cards { grid-template-columns: 1fr; max-width: 380px; }
   .hero { min-height: auto; padding: 142px 22px 48px; }
   .hero-split { flex-direction: column; gap: 32px; }
-  .hero-left { flex: 0 1 auto; text-align: center; max-width: 560px; }
+  .hero-left { flex: 0 1 auto; text-align: center; max-width: 560px; display: flex; flex-direction: column; align-items: center; }
+  .hero-left .award-badge { order: -1; }
   .hero .tagline { margin-left: auto; margin-right: auto; }
-  .award-badge { justify-content: center; margin: 0 auto 30px; width: fit-content; }
+  .feat-full { display: none; }
+  .feat-short { display: inline; }
+  .hero-features { align-items: center; }
+  .award-badge { justify-content: center; margin: 0 auto 24px; width: fit-content; }
   .rounds-counter { text-align: center; width: 100%; }
   .hero-left .rounds-counter { width: 100%; text-align: center; }
   .hero-left .cta-btn { display: block; text-align: center; }
