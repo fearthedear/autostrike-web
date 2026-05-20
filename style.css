@@ -389,13 +389,15 @@ footer {
   .hero-split { flex-direction: column; gap: 32px; }
   .hero-left { flex: 0 1 auto; text-align: center; max-width: 560px; }
   .hero .tagline { margin-left: auto; margin-right: auto; }
-  .award-badge { justify-content: center; }
-  .rounds-counter { text-align: center; }
+  .award-badge { justify-content: center; margin-left: 0; }
+  .rounds-counter { text-align: center; width: 100%; }
+  .hero-left .rounds-counter { width: 100%; text-align: center; }
+  .hero-left .cta-btn { display: block; text-align: center; }
   .device-row { width: min(100%, 420px); flex-direction: row; gap: 14px; }
-  .device-phone { flex-basis: 250px; }
-  .device-phone img { width: 220px; height: auto; }
+  .device-phone { flex-basis: 220px; }
+  .device-phone img { width: 200px; height: auto; }
   .device-watch { flex-basis: 150px; transform: translateY(4px); }
-  .device-watch img { width: 150px; height: auto; }
+  .device-watch img { width: 170px; height: auto; }
 }
 
 /* Download modal extras */
@@ -464,9 +466,10 @@ footer {
 .award-badge::after { clip-path: inset(0 0 0 50%); margin-left: -60px; }
 .award-text {
   display: flex; flex-direction: column; align-items: center;
+  text-align: center; min-width: 0;
 }
-.award-title { font-size: .9rem; font-weight: 700; letter-spacing: .45px; color: var(--text); white-space: nowrap; }
-.award-stars { color: var(--gold); font-size: 1.22rem; letter-spacing: 2px; margin-top: 4px; }
+.award-title { font-size: .9rem; font-weight: 700; letter-spacing: .45px; color: var(--text); white-space: nowrap; text-align: center; }
+.award-stars { color: var(--gold); font-size: 1.22rem; letter-spacing: 2px; margin-top: 4px; text-align: center; }
 
 /* Rounds counter */
 .rounds-counter {
