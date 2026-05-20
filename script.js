@@ -187,6 +187,11 @@ runQuery();   // shows the default empty hint, no list
 // ── Download modal ──
 function openDownloadModal(event, showPremium) {
   if (event) event.preventDefault();
+  // On iOS, skip modal and go straight to App Store
+  if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+    window.location.href = 'https://apps.apple.com/us/app/autostrike-golf/id6762587973';
+    return;
+  }
   var premiumSection = document.getElementById('modal-premium-section');
   if (premiumSection) premiumSection.style.display = showPremium ? '' : 'none';
   document.getElementById('download-modal').classList.add('open');
