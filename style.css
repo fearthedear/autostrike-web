@@ -65,31 +65,32 @@ nav {
   width: 350px; height: 350px; border-radius: 50%;
   background: rgba(56,170,56,.2); filter: blur(100px);
 }
-.hero-content { max-width: 1180px; width: 100%; }
-.hero-split { display: flex; align-items: center; justify-content: space-between; gap: clamp(48px, 6vw, 80px); }
-.hero-left { flex: 0 0 44%; text-align: left; max-width: 520px; }
-.hero-right { flex: 1 1 56%; display: flex; justify-content: center; align-items: center; min-width: 0; }
-.hero h1 { font-size: clamp(2.7rem, 5.4vw, 4.35rem); font-weight: 800; letter-spacing: -1.5px; line-height: 1.05; margin-bottom: 16px; }
-.hero-promise { font-size: clamp(1.05rem, 2vw, 1.35rem); color: #ffffff; font-weight: 600; margin-bottom: 12px; letter-spacing: .5px; }
+.hero-content { max-width: 1240px; width: 100%; }
+.hero-split { display: flex; align-items: center; justify-content: space-between; gap: clamp(56px, 7vw, 96px); }
+.hero-left { flex: 0 0 42%; text-align: left; max-width: 540px; padding-top: clamp(8px, 2vh, 28px); }
+.hero-right { flex: 1 1 58%; display: flex; justify-content: center; align-items: center; min-width: 0; }
+.hero h1 { font-size: clamp(2.8rem, 5.4vw, 4.35rem); font-weight: 800; letter-spacing: -1.5px; line-height: 1.03; margin-bottom: 18px; }
+.hero-promise { font-size: clamp(1.16rem, 2.1vw, 1.48rem); color: #ffffff; font-weight: 650; margin-bottom: 14px; letter-spacing: .35px; }
 .hero h1 .gold { color: var(--gold); }
-.hero .tagline { font-size: clamp(1rem, 1.6vw, 1.15rem); color: var(--text-muted); margin-bottom: 24px; max-width: 500px; line-height: 1.5; }
-.hero-left .cta-btn { margin-bottom: 4px; display: block; text-align: center; }
-.hero-left .rounds-counter { margin-top: 4px; text-align: center; }
+.hero .tagline { font-size: clamp(1.03rem, 1.55vw, 1.18rem); color: var(--text-muted); margin-bottom: 34px; max-width: 500px; line-height: 1.62; }
+.hero-left .cta-btn { display: inline-flex; align-items: center; justify-content: center; margin: 6px 0 0; min-width: 286px; text-align: center; }
+.hero-left .rounds-counter { width: 286px; max-width: 100%; margin-top: 12px; text-align: center; }
 .device-row {
-  width: min(100%, 600px);
-  display: flex; align-items: center; justify-content: center; gap: clamp(18px, 3vw, 34px);
+  width: min(100%, 690px);
+  display: flex; align-items: center; justify-content: center; gap: clamp(14px, 2.5vw, 30px);
 }
-.device-phone { line-height: 0; flex: 0 1 380px; }
-.device-phone img { width: auto; height: clamp(350px, 60vh, 700px); object-fit: contain; display: block; }
+.device-phone { line-height: 0; flex: 0 1 470px; }
+.device-phone img { width: auto; height: clamp(400px, 68vh, 800px); object-fit: contain; display: block; }
 .device-watch {
   display: flex; flex-direction: column; align-items: center;
-  transform: translateY(8px);
+  flex: 0 0 auto;
+  transform: translateY(10px);
 }
 .device-watch::before, .device-watch::after {
   content: none;
 }
 .device-watch img {
-  width: auto; height: clamp(200px, 38vh, 420px); object-fit: contain; display: block;
+  width: auto; height: clamp(160px, 28vh, 320px); object-fit: contain; display: block;
 }
 .hero-cta { margin-top: 36px; }
 .slots-counter { color: var(--text-muted); font-size: .9rem; margin-top: 12px; }
@@ -452,7 +453,7 @@ footer {
 /* Award badge */
 .award-badge {
   display: flex; align-items: center; justify-content: flex-start;
-  margin-bottom: 20px;
+  margin: 0 0 30px -10px;
 }
 .award-badge::before, .award-badge::after {
   content: ''; display: inline-block; width: 120px; height: 120px;
@@ -464,12 +465,12 @@ footer {
 .award-text {
   display: flex; flex-direction: column; align-items: center;
 }
-.award-title { font-size: .85rem; font-weight: 700; letter-spacing: .5px; color: var(--text); white-space: nowrap; }
-.award-stars { color: var(--gold); font-size: 1.2rem; letter-spacing: 2px; margin-top: 4px; }
+.award-title { font-size: .9rem; font-weight: 700; letter-spacing: .45px; color: var(--text); white-space: nowrap; }
+.award-stars { color: var(--gold); font-size: 1.22rem; letter-spacing: 2px; margin-top: 4px; }
 
 /* Rounds counter */
 .rounds-counter {
-  color: var(--text-muted); font-size: .9rem; margin-top: 4px; text-align: left;
+  color: var(--text-muted); font-size: .92rem; margin-top: 4px; text-align: left;
 }
 #rounds-count { color: var(--gold); font-weight: 700; }
 
