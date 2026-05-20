@@ -73,6 +73,14 @@ nav {
 .hero-promise { font-size: clamp(1.16rem, 2.1vw, 1.48rem); color: #ffffff; font-weight: 650; margin-bottom: 14px; letter-spacing: .35px; }
 .hero h1 .gold { color: var(--gold); }
 .hero .tagline { font-size: clamp(1.03rem, 1.55vw, 1.18rem); color: var(--text-muted); margin-bottom: 34px; max-width: 500px; line-height: 1.62; }
+.hero-features {
+  list-style: none; padding: 0; margin: 0 0 34px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.hero-features li {
+  font-size: clamp(.95rem, 1.4vw, 1.1rem); color: var(--text);
+  line-height: 1.5; font-weight: 500;
+}
 .hero-left .cta-btn { display: inline-flex; align-items: center; justify-content: center; margin: 6px 0 0; min-width: 286px; text-align: center; }
 .hero-left .rounds-counter { width: 286px; max-width: 100%; margin-top: 12px; text-align: center; }
 .device-row {
