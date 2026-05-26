@@ -24,17 +24,17 @@ export async function onRequestGet({ request, env }) {
   const roundId = (url.searchParams.get('id') || url.searchParams.get('round_id') || url.searchParams.get('roundId') || '').trim();
 
   if (!roundId) {
-    return jsonResponse({ error: 'Missing round ID.' }, 400);
+    return jsonResponse({ error: 'Missing round ID.' }, 400, request);
   }
 
   if (!UUID_PATTERN.test(roundId)) {
-    return jsonResponse({ error: 'Invalid round ID.' }, 400);
+    return jsonResponse({ error: 'Invalid round ID.' }, 400, request);
   }
 
   const supabaseUrl = supabaseBaseUrl(env);
   const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_ANON_KEY || env.SUPABASE_KEY;
   if (!supabaseUrl || !supabaseKey) {
-    return jsonResponse({ error: 'Round sharing is not configured.' }, 500);
+    return jsonResponse({ error: 'Round sharing is not configured.' }, 500, request);
   }
 
   const requestUrl = new URL(`${supabaseUrl}/rest/v1/scores`);
@@ -53,16 +53,16 @@ export async function onRequestGet({ request, env }) {
 
   if (!response.ok) {
     console.error('Failed to load shared round:', await response.text());
-    return jsonResponse({ error: 'Failed to load round.' }, 500);
+    return jsonResponse({ error: 'Failed to load round.' }, 500, request);
   }
 
   const rows = await response.json();
   const row = Array.isArray(rows) ? rows[0] : null;
   if (!row) {
-    return jsonResponse({ error: 'Round not found.' }, 404);
+    return jsonResponse({ error: 'Round not found.' }, 404, request);
   }
 
-  return jsonResponse({ round: normalizeRound(row) });
+  return jsonResponse({ round: normalizeRound(row) }, 200, request);
 }
 
 export async function onRequestOptions({ request }) {
@@ -115,7 +115,7 @@ function normalizedString(value) {
   return trimmedValue.length > 0 ? trimmedValue : null;
 }
 
-function jsonResponse(payload, status = 200) {
+function jsonResponse(payload, status = 200, request = null) {
   return new Response(JSON.stringify(payload), {
     status,
     headers: {
