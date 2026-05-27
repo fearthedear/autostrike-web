@@ -299,3 +299,65 @@
     flex-direction: column;
   }
 }
+
+/* Download modal */
+.round-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  align-items: center;
+  justify-content: center;
+}
+.round-modal-overlay.open {
+  display: flex;
+}
+.round-modal {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px 28px;
+  max-width: 380px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+  animation: roundModalIn 0.2s ease-out;
+}
+@keyframes roundModalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.round-modal h2 {
+  margin: 0 0 8px;
+  font-size: 1.3rem;
+}
+.round-modal p {
+  margin: 0 0 20px;
+  color: #666;
+  font-size: 0.95rem;
+}
+.round-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #999;
+  line-height: 1;
+}
+.round-modal-close:hover {
+  color: #333;
+}
+.round-modal-qr {
+  margin: 0 auto 20px;
+  width: 200px;
+  height: 200px;
+}
+.round-modal-qr img {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+}

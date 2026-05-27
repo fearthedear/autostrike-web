@@ -122,8 +122,18 @@ function logoMarkup() {
 function actionsMarkup() {
   return `
     <div class="round-actions">
-      <a class="round-button round-button-primary" href="${APP_STORE_URL}">Download AutoStrike</a>
-      <a class="round-button round-button-secondary" href="${APP_STORE_URL}">Get on App Store</a>
+      <a class="round-button round-button-primary" href="${APP_STORE_URL}" onclick="return handleDownloadClick(event)">Download AutoStrike</a>
+    </div>
+    <div class="round-modal-overlay" id="round-download-modal" onclick="closeRoundModal(event)">
+      <div class="round-modal">
+        <button class="round-modal-close" onclick="closeRoundModal()">&times;</button>
+        <h2>AutoStrike Golf</h2>
+        <p>Scan with your iPhone camera to open or install</p>
+        <div class="round-modal-qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=8&data=https%3A%2F%2Fapps.apple.com%2Fus%2Fapp%2Fautostrike-golf%2Fid6762587973" alt="QR Code for App Store"></div>
+        <a href="${APP_STORE_URL}" target="_blank" rel="noopener">
+          <img src="/app-store-badge.svg" alt="Download on the App Store" style="height:44px">
+        </a>
+      </div>
     </div>
   `;
 }
@@ -453,3 +463,25 @@ function escapeHtml(value) {
     "'": '&#39;',
   })[character]);
 }
+
+// ── Download modal (same behavior as landing page) ──
+function handleDownloadClick(event) {
+  if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+    return true; // follow the href to App Store
+  }
+  event.preventDefault();
+  document.getElementById('round-download-modal').classList.add('open');
+  return false;
+}
+
+function closeRoundModal(event) {
+  if (event && event.target !== event.currentTarget) return;
+  document.getElementById('round-download-modal').classList.remove('open');
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('round-download-modal');
+    if (modal) modal.classList.remove('open');
+  }
+});
