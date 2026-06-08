@@ -6,12 +6,17 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://autostrike.golf/round/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://autostrike.golf/privacy.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://autostrike.golf/terms</loc>
+    <loc>https://autostrike.golf/terms/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
