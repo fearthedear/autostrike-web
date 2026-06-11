@@ -187,8 +187,9 @@ runQuery();   // shows the default empty hint, no list
 // ── Download modal ──
 function openDownloadModal(event, showPremium) {
   if (event) event.preventDefault();
-  // On iOS, skip modal and go straight to App Store
-  if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+  // On iOS, regular download clicks can go straight to the App Store.
+  // Premium claim clicks must still show the email form first.
+  if (/iPhone|iPad|iPod/.test(navigator.userAgent) && !showPremium) {
     window.location.href = 'https://apps.apple.com/us/app/autostrike-golf/id6762587973';
     return;
   }
