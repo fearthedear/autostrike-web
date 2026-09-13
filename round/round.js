@@ -243,7 +243,7 @@ function teamSummaryMarkup(results, round) {
   const storedSentences = Array.isArray(storedSummary?.sentences)
     ? storedSummary.sentences.filter((sentence) => typeof sentence === 'string' && sentence.trim())
     : [];
-  const sentences = storedSentences.length === 5
+  const sentences = storedSummary?.version === 2 && storedSentences.length === 5
     ? storedSentences
     : Array.isArray(results.summarySentences) ? results.summarySentences : [];
   if (!sentences.length) return '';

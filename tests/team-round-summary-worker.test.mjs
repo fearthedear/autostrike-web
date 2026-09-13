@@ -76,7 +76,7 @@ test('prompt captures the recap constraints', () => {
   assert.match(TEAM_ROUND_SUMMARY_PROMPT, /exactly five concise, natural sentences/i);
   assert.match(TEAM_ROUND_SUMMARY_PROMPT, /one-based played order/i);
   assert.match(TEAM_ROUND_SUMMARY_PROMPT, /Never expose source course-hole numbers/i);
-  assert.match(TEAM_ROUND_SUMMARY_PROMPT, /Name the player who supplied the counting score/i);
+  assert.match(TEAM_ROUND_SUMMARY_PROMPT, /\[Player\] scored \[value\] points\/strokes for \[Team\]/i);
   assert.match(TEAM_ROUND_SUMMARY_PROMPT, /birdie\/eagle/i);
 });
 

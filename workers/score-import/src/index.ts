@@ -2,6 +2,7 @@
 
 import {
   TEAM_ROUND_SUMMARY_PROMPT,
+  TEAM_ROUND_SUMMARY_VERSION,
   type TeamRoundFactPacket,
   buildTeamRoundFactPacket,
   isCompletedTeamRound,
@@ -348,7 +349,7 @@ async function processTeamRoundSummary(
   await patchScoreMetadata(env, scoreId, {
     ...metadata,
     ai_round_summary: {
-      version: 1,
+      version: TEAM_ROUND_SUMMARY_VERSION,
       model,
       generated_at: new Date().toISOString(),
       sentences: validated,
@@ -358,7 +359,8 @@ async function processTeamRoundSummary(
 }
 
 function validStoredSummary(value: any): boolean {
-  return Array.isArray(value?.sentences)
+  return value?.version === TEAM_ROUND_SUMMARY_VERSION
+    && Array.isArray(value?.sentences)
     && value.sentences.length === 5
     && value.sentences.every((sentence: unknown) => typeof sentence === "string" && sentence.trim());
 }

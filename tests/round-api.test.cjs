@@ -84,4 +84,6 @@ test('shared-round API schedules backend generation for a completed team round',
   assert.equal(generation.options.method, 'POST');
   assert.equal(generation.options.headers.Authorization, 'Bearer test-key');
   assert.equal(JSON.parse(generation.options.body).score_id, 'dd5a8b5f-c99d-47f1-b3cd-b17560abbd90');
+  const source = await readFile(new URL('../functions/api/round.js', `file://${__filename}`), 'utf8');
+  assert.match(source, /summaryVersion === 2/);
 });

@@ -62,7 +62,7 @@ test('team recap prefers a valid backend-generated summary with deterministic fa
   const source = await readFile(new URL('../round/round.js', `file://${__filename}`), 'utf8');
   assert.match(source, /teamSummaryMarkup\(teamResults, round\)/);
   assert.match(source, /metadata\?\.ai_round_summary/);
-  assert.match(source, /storedSentences\.length === 5/);
+  assert.match(source, /storedSummary\?\.version === 2 && storedSentences\.length === 5/);
   assert.match(source, /results\.summarySentences/);
 });
 

@@ -172,10 +172,11 @@ function needsTeamRoundSummary(round) {
   const metadata = round?.metadata && typeof round.metadata === 'object' ? round.metadata : {};
   const teamSettings = metadata.team_settings ?? metadata.teamSettings;
   const sentences = metadata.ai_round_summary?.sentences ?? metadata.aiRoundSummary?.sentences;
+  const summaryVersion = metadata.ai_round_summary?.version ?? metadata.aiRoundSummary?.version;
   return teamSettings?.enabled === true
     && metadata.is_incomplete !== true
     && metadata.isIncomplete !== true
-    && !(Array.isArray(sentences) && sentences.length === 5);
+    && !(summaryVersion === 2 && Array.isArray(sentences) && sentences.length === 5);
 }
 
 async function requestTeamRoundSummary(env, supabaseKey, scoreId) {
