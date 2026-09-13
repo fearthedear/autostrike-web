@@ -229,7 +229,7 @@
     const lastIndex = Math.min(first.holeResults.length, second.holeResults.length) - 1;
     const firstLast = first.holeResults[lastIndex]?.value;
     const secondLast = second.holeResults[lastIndex]?.value;
-    const finalHoleNumber = first.holeResults[lastIndex]?.playedNumber ?? lastIndex + 1;
+    const finalHoleNumber = lastIndex + 1;
     const finalIsTie = first.total === second.total;
     const lastHoleWinner = typeof firstLast === 'number' && typeof secondLast === 'number' && firstLast !== secondLast
       ? (compareScores(firstLast, secondLast, scorecardMode) < 0 ? first : second)
@@ -238,7 +238,11 @@
     if (lastHoleWinner && finalIsTie) {
       const winnerValue = lastHoleWinner.id === first.id ? firstLast : secondLast;
       const loserValue = lastHoleWinner.id === first.id ? secondLast : firstLast;
-      sentences.push(`${lastHoleWinner.displayName} won the final hole ${winnerValue}–${loserValue} on hole ${finalHoleNumber} to square the match at ${first.total}–${second.total}.`);
+      const finalHole = lastHoleWinner.holeResults[lastIndex];
+      const contributors = contributorNames(lastHoleWinner, finalHole);
+      const scorer = contributors.length === 1 ? contributors[0] : lastHoleWinner.displayName;
+      const valueUnit = scorecardMode === 'stableford' ? (winnerValue === 1 ? 'point' : 'points') : (winnerValue === 1 ? 'stroke' : 'strokes');
+      sentences.push(`${scorer} scored ${winnerValue} ${valueUnit} for ${lastHoleWinner.displayName} on the final hole, winning it ${winnerValue}–${loserValue} on hole ${finalHoleNumber} to square the match at ${first.total}–${second.total}.`);
     } else if (lastHoleWinner) {
       const winnerValue = lastHoleWinner.id === first.id ? firstLast : secondLast;
       const loserValue = lastHoleWinner.id === first.id ? secondLast : firstLast;
@@ -276,10 +280,13 @@
     if (!biggest) return null;
 
     const winnerHole = biggest.winner.holeResults[biggest.index];
-    const contributorNames = biggest.winner.members
-      .filter((member) => (winnerHole.contributorIds || []).includes(member.id))
-      .map((member) => member.name);
-    const playerText = contributorNames.length ? `${joinNames(contributorNames)} delivered` : `${biggest.winner.displayName} produced`;
+    const contributors = contributorNames(biggest.winner, winnerHole);
+    const grossResult = contributors.length === 1 ? golfScoreName(winnerHole.grossScore, winnerHole.par) : null;
+    const playerText = grossResult && scorecardMode === 'stableford'
+      ? `${contributors[0]}'s ${grossResult} earned ${winnerHole.value} Stableford points and produced`
+      : contributors.length
+        ? `${joinNames(contributors)} delivered`
+        : `${biggest.winner.displayName} produced`;
     const unit = scorecardMode === 'stableford' ? 'point' : 'stroke';
     const before = scorePosition(biggest.beforeWinner, biggest.beforeLoser, scorecardMode);
     const after = scorePosition(biggest.afterWinner, biggest.afterLoser, scorecardMode);
@@ -374,11 +381,11 @@
     holes.forEach((hole, index) => {
       if (index >= startIndex && (hole.contributorIds || []).includes(playerId)) {
         if (current.length === 0) {
-          current.startHole = hole.playedNumber ?? index + 1;
+          current.startHole = index + 1;
           current.startIndex = index;
         }
         current.length += 1;
-        current.endHole = hole.playedNumber ?? index + 1;
+        current.endHole = index + 1;
         current.endIndex = index;
         if (current.length > best.length) best = { ...current };
       } else {
@@ -401,7 +408,23 @@
   }
 
   function holeLabel(hole, index) {
-    return `hole ${hole?.playedNumber ?? index + 1}`;
+    return `hole ${index + 1}`;
+  }
+
+  function contributorNames(team, hole) {
+    return team.members
+      .filter((member) => (hole?.contributorIds || []).includes(member.id))
+      .map((member) => member.name);
+  }
+
+  function golfScoreName(grossScore, par) {
+    if (!Number.isFinite(grossScore) || !Number.isFinite(par)) return null;
+    const toPar = grossScore - par;
+    if (toPar <= -2) return 'eagle';
+    if (toPar === -1) return 'birdie';
+    if (toPar === 0) return 'par';
+    if (toPar === 1) return 'bogey';
+    return null;
   }
 
   function rankResults(entries, scorecardMode, nameKey) {
