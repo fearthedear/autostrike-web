@@ -59,8 +59,14 @@ function renderRound(round) {
   const toParText = typeof toParValue === 'number' ? formatToPar(toParValue) : '-';
   const teeText = teeBoxDisplayText(round);
   const sectionsMarkup = scorecard.sections.length
-    ? scorecard.sections.map(scorecardSectionMarkup).join('')
+    ? scorecard.sections.map((section) => scorecardSectionMarkup(section, scorecard.playerName)).join('')
     : '<p class="round-muted">Hole-by-hole details are unavailable for this round.</p>';
+  const heroScoreMarkup = teamResults ? '' : `
+      <div class="round-score">
+        <span class="round-score-number">${escapeHtml(totalScoreText)}</span>
+        <span class="round-to-par ${toParClassName(toParValue)}">${escapeHtml(toParText)}</span>
+      </div>
+    `;
 
   root.innerHTML = `
     <section class="round-card round-hero">
@@ -73,15 +79,16 @@ function renderRound(round) {
           <span>${escapeHtml(formatPlayedOn(round.playedOn))}</span>
         </div>
       </div>
-      <div class="round-score">
-        <span class="round-score-number">${escapeHtml(totalScoreText)}</span>
-        <span class="round-to-par ${toParClassName(toParValue)}">${escapeHtml(toParText)}</span>
-      </div>
+      ${heroScoreMarkup}
     </section>
 
+    ${teamResults ? teamResultsMarkup(teamResults) : ''}
+
+    ${teamResults ? teamSummaryMarkup(teamResults) : ''}
+
     <section class="round-card">
-      <p class="round-eyebrow">Player Stats</p>
-      <h2>Round summary</h2>
+      <p class="round-eyebrow">Individual Stats</p>
+      <h2>${escapeHtml(`${scorecard.playerName}'s round`)}</h2>
       <div class="round-stats-grid">
         ${metricMarkup('Score', `${totalScoreText} (${toParText})`)}
         ${metricMarkup('Holes Played', String(metrics.scoredHoleCount))}
@@ -94,13 +101,13 @@ function renderRound(round) {
       </div>
     </section>
 
-    ${teamResults ? teamResultsMarkup(teamResults) : ''}
-
     <section class="round-card">
       <p class="round-eyebrow">Scorecard</p>
-      <h2>Hole by hole</h2>
+      <h2>${escapeHtml(`${scorecard.playerName} · Hole by hole`)}</h2>
       <div class="round-scorecard-stack">${sectionsMarkup}</div>
     </section>
+
+    ${teamResults ? individualResultsMarkup(teamResults) : ''}
 
     <section class="round-card round-download-card">
       <div>
@@ -150,16 +157,73 @@ function teamCardMarkup(team, scorecardMode, tiedLead) {
         ? 'Winner'
         : ordinal(team.rank);
   const memberNames = team.members.map((member) => member.name).join(' · ');
+  const showMembers = team.displayName === team.name;
 
   return `
     <article class="round-team-card ${team.rank === 1 && team.total !== null ? 'round-team-card-leading' : ''}">
       <div class="round-team-card-heading">
         <span class="round-team-rank">${escapeHtml(rankText)}</span>
-        <strong>${escapeHtml(team.name)}</strong>
+        <strong>${escapeHtml(team.displayName)}</strong>
       </div>
       <span class="round-team-score">${escapeHtml(resultText)}</span>
-      <span class="round-team-members">${escapeHtml(memberNames)}</span>
+      ${showMembers ? `<span class="round-team-members">${escapeHtml(memberNames)}</span>` : ''}
       <span class="round-team-holes">${escapeHtml(`${team.completedHoleCount} holes scored`)}</span>
+    </article>
+  `;
+}
+
+function teamSummaryMarkup(results) {
+  const sentences = Array.isArray(results.summarySentences) ? results.summarySentences : [];
+  if (!sentences.length) return '';
+  return `
+    <section class="round-card round-ai-summary">
+      <p class="round-eyebrow">AI Round Summary</p>
+      <h2>How the match unfolded</h2>
+      <p>${sentences.map((sentence) => escapeHtml(sentence)).join(' ')}</p>
+      <span>Generated from the hole-by-hole scores.</span>
+    </section>
+  `;
+}
+
+function individualResultsMarkup(results) {
+  const tiedLead = results.individualResults.filter((player) => player.rank === 1 && player.total !== null).length > 1;
+  const scoreLabel = results.scorecardMode === 'stableford' ? 'Stableford' : 'Stroke play';
+  const basisLabel = results.basis === 'net' ? 'Net' : 'Gross';
+  return `
+    <section class="round-card round-individual-results">
+      <div class="round-section-heading">
+        <div>
+          <p class="round-eyebrow">Individual Results</p>
+          <h2>Player leaderboard</h2>
+        </div>
+        <span class="round-format-pill">${escapeHtml(`${basisLabel} ${scoreLabel}`)}</span>
+      </div>
+      <div class="round-individual-list">
+        ${results.individualResults.map((player) => individualResultMarkup(player, results.scorecardMode, tiedLead)).join('')}
+      </div>
+    </section>
+  `;
+}
+
+function individualResultMarkup(player, scorecardMode, tiedLead) {
+  const resultText = player.total === null
+    ? '-'
+    : scorecardMode === 'stableford'
+      ? `${player.total} pts`
+      : `${player.total}${typeof player.toPar === 'number' ? ` (${formatToPar(player.toPar)})` : ''}`;
+  const rankText = player.total === null
+    ? 'No score'
+    : player.rank === 1 && tiedLead
+      ? 'Tied lead'
+      : player.rank === 1
+        ? '1st'
+        : ordinal(player.rank);
+  return `
+    <article class="round-individual-row ${player.rank === 1 && player.total !== null ? 'round-individual-row-leading' : ''}">
+      <span class="round-individual-rank">${escapeHtml(rankText)}</span>
+      <strong>${escapeHtml(player.name)}</strong>
+      <span class="round-individual-handicap">${escapeHtml(`Playing handicap ${player.playingHandicap}`)}</span>
+      <span class="round-individual-score">${escapeHtml(resultText)}</span>
     </article>
   `;
 }
@@ -210,13 +274,13 @@ function metricMarkup(label, value) {
   `;
 }
 
-function scorecardSectionMarkup(section) {
+function scorecardSectionMarkup(section, playerName) {
   return `
     <div class="round-scorecard-section">
       <h3>${escapeHtml(section.title)}</h3>
       ${scorecardRowMarkup('Hole', section.holes, (hole) => escapeHtml(String(hole.holeNumber)), 'Tot', true)}
       ${scorecardRowMarkup('Par', section.holes, (hole) => escapeHtml(String(hole.par)), sumText(section.holes, 'par'), true)}
-      ${scorecardRowMarkup('You', section.holes, scoreCellMarkup, sumText(section.holes, 'score'))}
+      ${scorecardRowMarkup(playerName, section.holes, scoreCellMarkup, sumText(section.holes, 'score'))}
       ${scorecardRowMarkup('Putts', section.holes, (hole) => escapeHtml(numberText(hole.putts)), sumText(section.holes, 'putts'), true)}
     </div>
   `;
@@ -256,7 +320,16 @@ function buildScorecard(round) {
     holes,
     sections: groupedSections(holes),
     metrics: playerMetrics(holes),
+    playerName: primaryPlayerName(round),
   };
+}
+
+function primaryPlayerName(round) {
+  const metadata = isRecord(round.metadata) ? round.metadata : {};
+  const players = Array.isArray(metadata.players) ? metadata.players.filter(isRecord) : [];
+  const primaryPlayerId = stringField(metadata, ['primary_player_id', 'primaryPlayerId']);
+  const primaryPlayer = players.find((player) => stringField(player, ['id']) === primaryPlayerId);
+  return stringField(primaryPlayer, ['name']) || 'You';
 }
 
 function scorecardHoles(round) {

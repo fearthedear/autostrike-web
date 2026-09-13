@@ -35,6 +35,8 @@ test('shared-round API returns sanitized course stroke indexes', async (t) => {
   const body = await response.json();
 
   assert.equal(response.status, 200);
+  assert.equal(response.headers.get('x-robots-tag'), 'noindex, nofollow, noarchive, nosnippet');
+  assert.equal(response.headers.get('referrer-policy'), 'no-referrer');
   assert.deepEqual(body.round.courseHoles, [{ holeNumber: 19, par: 4, strokeIndex: 8 }]);
   assert.equal(requests.length, 2);
   assert.match(requests[1], /\/rest\/v1\/courses/);

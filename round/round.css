@@ -248,6 +248,65 @@
   font-weight: 700;
 }
 
+.round-ai-summary {
+  border-color: rgba(74, 222, 128, 0.22);
+  background:
+    linear-gradient(145deg, rgba(74, 222, 128, 0.08), transparent 64%),
+    rgba(20, 46, 22, 0.86);
+}
+
+.round-ai-summary p:not(.round-eyebrow) {
+  margin: 16px 0 10px;
+  color: var(--text);
+  font-size: clamp(1rem, 2vw, 1.08rem);
+  line-height: 1.72;
+}
+
+.round-ai-summary > span {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.round-individual-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.round-individual-row {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr) minmax(9rem, auto) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.round-individual-row-leading {
+  border-color: rgba(201, 169, 110, 0.34);
+}
+
+.round-individual-rank,
+.round-individual-handicap {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.round-individual-row strong,
+.round-individual-score {
+  color: var(--text);
+}
+
+.round-individual-score {
+  font-size: 1.18rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
 .round-scorecard-stack {
   display: flex;
   flex-direction: column;
@@ -386,6 +445,14 @@
 
   .round-team-grid {
     grid-template-columns: 1fr;
+  }
+
+  .round-individual-row {
+    grid-template-columns: 4.5rem minmax(0, 1fr) auto;
+  }
+
+  .round-individual-handicap {
+    display: none;
   }
 }
 

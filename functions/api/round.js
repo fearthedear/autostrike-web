@@ -166,6 +166,8 @@ function jsonResponse(payload, status = 200, request = null) {
       ...corsHeaders(request),
       'content-type': 'application/json; charset=utf-8',
       'cache-control': 'no-store',
+      'x-robots-tag': 'noindex, nofollow, noarchive, nosnippet',
+      'referrer-policy': 'no-referrer',
     },
   });
 }

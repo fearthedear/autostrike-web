@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { buildTeamResults, strokesReceived } = require('../round/team-results.js');
+const { buildTeamResults, strokeAdjustments, strokesReceived } = require('../round/team-results.js');
 
 const holes = [
   { id: 'h1', par: 4, strokeIndex: 1 },
@@ -34,9 +34,10 @@ test('best-ball net Stableford ranks the highest team points first', () => {
   assert.equal(result.basis, 'net');
   assert.equal(result.scorecardMode, 'stableford');
   assert.deepEqual(result.teams.map((team) => [team.name, team.total, team.rank]), [
-    ['Team A', 5, 1],
+    ['Team A', 10, 1],
     ['Team B', 3, 2],
   ]);
+  assert.equal(result.teams[0].displayName, 'Linus + Toby');
 });
 
 test('gross stroke play ranks the lowest best-ball score first', () => {
@@ -50,10 +51,10 @@ test('gross stroke play ranks the lowest best-ball score first', () => {
   ]);
 });
 
-test('net scoring falls back visibly when stroke indexes are unavailable', () => {
+test('net scoring mirrors the app order fallback when stroke indexes are unavailable', () => {
   const result = buildTeamResults(sampleRound(), holes.map(({ id, par }) => ({ id, par })));
-  assert.equal(result.basis, 'gross');
-  assert.equal(result.isBasisFallback, true);
+  assert.equal(result.basis, 'net');
+  assert.equal(result.isBasisFallback, false);
 });
 
 test('scramble uses the configured team scorekeeper', () => {
@@ -99,8 +100,24 @@ test('the supplied KGPA round produces the expected team leaderboard', () => {
   const result = buildTeamResults(round, kgpaHoles);
   assert.deepEqual(result.teams.map((team) => [team.name, team.total, team.rank]), [
     ['Team B', 44, 1],
-    ['Team A', 43, 2],
+    ['Team A', 44, 1],
   ]);
+  assert.deepEqual(result.teams.map((team) => team.displayName), [
+    'Andre + Ankur',
+    'Linuskinzel + Toby',
+  ]);
+  assert.equal(result.summarySentences.length, 5);
+  assert.match(result.summarySentences[0], /finished tied on 44 points/i);
+  assert.match(result.summarySentences[4], /to square the match at 44–44/i);
+});
+
+test('handicap strokes are allocated once across repeated nines like the app', () => {
+  const repeatedNine = [8, 14, 4, 12, 2, 16, 18, 10, 6, 8, 14, 4, 12, 2, 16, 18, 10, 6]
+    .map((strokeIndex, index) => ({ id: `h${index + 1}`, par: 4, strokeIndex }));
+  const adjustments = strokeAdjustments(14, repeatedNine);
+  assert.equal(adjustments.reduce((sum, value) => sum + value, 0), 14);
+  assert.equal(adjustments.filter((value) => value === 1).length, 14);
+  assert.equal(adjustments.filter((value) => value === 0).length, 4);
 });
 
 test('handicap strokes follow the stored stroke index', () => {
