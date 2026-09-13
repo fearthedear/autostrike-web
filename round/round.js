@@ -106,7 +106,7 @@ function renderRound(round) {
 
     ${teamResults ? teamResultsMarkup(teamResults) : ''}
 
-    ${teamResults ? teamSummaryMarkup(teamResults) : ''}
+    ${teamResults ? teamSummaryMarkup(teamResults, round) : ''}
 
     ${playerResults?.individualResults.length ? playerLeaderboardMarkup(playerResults, roundViewState.selectedPlayerId) : ''}
 
@@ -238,8 +238,14 @@ function teamCardMarkup(team, scorecardMode, tiedLead) {
   `;
 }
 
-function teamSummaryMarkup(results) {
-  const sentences = Array.isArray(results.summarySentences) ? results.summarySentences : [];
+function teamSummaryMarkup(results, round) {
+  const storedSummary = round?.metadata?.ai_round_summary ?? round?.metadata?.aiRoundSummary;
+  const storedSentences = Array.isArray(storedSummary?.sentences)
+    ? storedSummary.sentences.filter((sentence) => typeof sentence === 'string' && sentence.trim())
+    : [];
+  const sentences = storedSentences.length === 5
+    ? storedSentences
+    : Array.isArray(results.summarySentences) ? results.summarySentences : [];
   if (!sentences.length) return '';
   return `
     <section class="round-card round-ai-summary">

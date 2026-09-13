@@ -19,7 +19,7 @@ test('team games place the player leaderboard above scorecard and individual sta
   const source = await readFile(new URL('../round/round.js', `file://${__filename}`), 'utf8');
   const renderStart = source.indexOf('root.innerHTML = `');
   const teamResults = source.indexOf('teamResultsMarkup(teamResults)', renderStart);
-  const aiSummary = source.indexOf('teamSummaryMarkup(teamResults)', renderStart);
+  const aiSummary = source.indexOf('teamSummaryMarkup(teamResults, round)', renderStart);
   const leaderboard = source.indexOf('playerLeaderboardMarkup(playerResults', renderStart);
   const scorecard = source.indexOf('<p class="round-eyebrow">Scorecard</p>', renderStart);
   const download = source.indexOf('round-download-card', renderStart);
@@ -56,6 +56,14 @@ test('scorecards label holes by play order and separate date from tee metadata',
   assert.match(source, /class="round-tee-pill"/);
   assert.match(source, /\$\{escapeHtml\(teeText\)\} tees/);
   assert.match(css, /\.round-meta \{[\s\S]*flex-direction: column/);
+});
+
+test('team recap prefers a valid backend-generated summary with deterministic fallback', async () => {
+  const source = await readFile(new URL('../round/round.js', `file://${__filename}`), 'utf8');
+  assert.match(source, /teamSummaryMarkup\(teamResults, round\)/);
+  assert.match(source, /metadata\?\.ai_round_summary/);
+  assert.match(source, /storedSentences\.length === 5/);
+  assert.match(source, /results\.summarySentences/);
 });
 
 test('download popup sits outside filtered cards and iOS follows the App Store link', async () => {
