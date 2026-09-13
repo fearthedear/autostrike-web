@@ -19,7 +19,7 @@ const SCORE_COLUMNS = [
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-export async function onRequestGet({ request, env }) {
+export async function onRequestGet({ request, env, waitUntil }) {
   const url = new URL(request.url);
   const roundId = (url.searchParams.get('id') || url.searchParams.get('round_id') || url.searchParams.get('roundId') || '').trim();
 
@@ -64,6 +64,15 @@ export async function onRequestGet({ request, env }) {
 
   const round = normalizeRound(row);
   round.courseHoles = await loadCourseHoles(supabaseUrl, supabaseKey, row.course_id);
+
+  if (needsTeamRoundSummary(round)) {
+    const generation = requestTeamRoundSummary(env, supabaseKey, round.id);
+    if (typeof waitUntil === 'function') {
+      waitUntil(generation);
+    } else {
+      await generation;
+    }
+  }
 
   return jsonResponse({ round }, 200, request);
 }
@@ -157,6 +166,35 @@ function normalizedString(value) {
 
   const trimmedValue = value.trim();
   return trimmedValue.length > 0 ? trimmedValue : null;
+}
+
+function needsTeamRoundSummary(round) {
+  const metadata = round?.metadata && typeof round.metadata === 'object' ? round.metadata : {};
+  const teamSettings = metadata.team_settings ?? metadata.teamSettings;
+  const sentences = metadata.ai_round_summary?.sentences ?? metadata.aiRoundSummary?.sentences;
+  return teamSettings?.enabled === true
+    && metadata.is_incomplete !== true
+    && metadata.isIncomplete !== true
+    && !(Array.isArray(sentences) && sentences.length === 5);
+}
+
+async function requestTeamRoundSummary(env, supabaseKey, scoreId) {
+  const workerUrl = env.ROUND_SUMMARY_WORKER_URL || 'https://score-import.autostrikegolf.com/round-summary';
+  try {
+    const response = await fetch(workerUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ score_id: scoreId }),
+    });
+    if (!response.ok) {
+      console.error('Failed to generate team round summary:', response.status, await response.text());
+    }
+  } catch (error) {
+    console.error('Failed to request team round summary:', error);
+  }
 }
 
 function jsonResponse(payload, status = 200, request = null) {

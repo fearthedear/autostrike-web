@@ -66,6 +66,17 @@ test('team recap prefers a valid backend-generated summary with deterministic fa
   assert.match(source, /results\.summarySentences/);
 });
 
+test('production workflow deploys the authenticated summary worker', async () => {
+  const [workflow, worker] = await Promise.all([
+    readFile(new URL('../.github/workflows/deploy.yml', `file://${__filename}`), 'utf8'),
+    readFile(new URL('../workers/score-import/src/index.ts', `file://${__filename}`), 'utf8'),
+  ]);
+  assert.match(workflow, /deploy --config workers\/score-import\/wrangler\.jsonc/);
+  assert.match(worker, /url\.pathname === "\/round-summary"/);
+  assert.match(worker, /authenticatedUserId\(env, req\)/);
+  assert.match(worker, /score\.user_id/);
+});
+
 test('download popup sits outside filtered cards and iOS follows the App Store link', async () => {
   const [source, css, qrCode] = await Promise.all([
     readFile(new URL('../round/round.js', `file://${__filename}`), 'utf8'),

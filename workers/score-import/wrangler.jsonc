@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "autostrike-score-import",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-04-29",
+  "compatibility_flags": ["nodejs_compat"],
+  "send_email": [
+    { "name": "EMAIL" }
+  ],
+  "routes": [
+    { "pattern": "score-import.autostrikegolf.com/*", "zone_name": "autostrikegolf.com" }
+  ],
+  "vars": {
+    "SUPABASE_URL": "https://iibpcgmvpocijlsfrkor.supabase.co",
+    "OPENAI_MODEL": "gpt-5",
+    "ROUND_SUMMARY_MODEL": "gpt-4o-mini",
+    "EMAIL_FROM_ADDR": "scores@autostrikegolf.com",
+    "EMAIL_FROM_NAME": "AutoStrike"
+  },
+  "observability": { "enabled": true }
+}
