@@ -62,7 +62,10 @@ export async function onRequestGet({ request, env }) {
     return jsonResponse({ error: 'Round not found.' }, 404, request);
   }
 
-  return jsonResponse({ round: normalizeRound(row) }, 200, request);
+  const round = normalizeRound(row);
+  round.courseHoles = await loadCourseHoles(supabaseUrl, supabaseKey, row.course_id);
+
+  return jsonResponse({ round }, 200, request);
 }
 
 export async function onRequestOptions({ request }) {
@@ -104,6 +107,47 @@ function normalizeRound(row) {
     source: row.source,
     metadata,
   };
+}
+
+async function loadCourseHoles(supabaseUrl, supabaseKey, courseId) {
+  if (!courseId) return [];
+
+  try {
+    const requestUrl = new URL(`${supabaseUrl}/rest/v1/courses`);
+    requestUrl.searchParams.set('select', 'holes');
+    requestUrl.searchParams.set('id', `eq.${courseId}`);
+    requestUrl.searchParams.set('limit', '1');
+
+    const response = await fetch(requestUrl.toString(), {
+      headers: {
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+        Accept: 'application/json',
+      },
+    });
+    if (!response.ok) {
+      console.error('Failed to load shared round course holes:', await response.text());
+      return [];
+    }
+
+    const rows = await response.json();
+    const holes = Array.isArray(rows?.[0]?.holes) ? rows[0].holes : [];
+    return holes.flatMap((hole) => {
+      if (!hole || typeof hole !== 'object' || Array.isArray(hole)) return [];
+      const holeNumber = positiveInteger(hole.holeNumber ?? hole.hole_number ?? hole.number);
+      const par = positiveInteger(hole.par);
+      const strokeIndex = positiveInteger(hole.strokeIndex ?? hole.stroke_index ?? hole.index);
+      return holeNumber && par ? [{ holeNumber, par, strokeIndex }] : [];
+    });
+  } catch (error) {
+    console.error('Failed to load shared round course holes:', error);
+    return [];
+  }
+}
+
+function positiveInteger(value) {
+  const parsed = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.round(parsed) : null;
 }
 
 function normalizedString(value) {

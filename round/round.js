@@ -52,6 +52,7 @@ function statusCard(title) {
 function renderRound(round) {
   const scorecard = buildScorecard(round);
   const metrics = scorecard.metrics || emptyMetrics();
+  const teamResults = window.AutoStrikeTeamResults?.buildTeamResults(round, scorecard.holes) || null;
   const totalScore = metrics.totalScore ?? round.totalScore;
   const totalScoreText = numberText(totalScore);
   const toParValue = metrics.toPar ?? round.toPar;
@@ -93,6 +94,8 @@ function renderRound(round) {
       </div>
     </section>
 
+    ${teamResults ? teamResultsMarkup(teamResults) : ''}
+
     <section class="round-card">
       <p class="round-eyebrow">Scorecard</p>
       <h2>Hole by hole</h2>
@@ -108,6 +111,66 @@ function renderRound(round) {
       ${actionsMarkup()}
     </section>
   `;
+}
+
+function teamResultsMarkup(results) {
+  const formatLabel = results.scoringMode === 'scramble' ? 'Scramble' : 'Best ball';
+  const scoreLabel = results.scorecardMode === 'stableford' ? 'Stableford' : 'Stroke play';
+  const basisLabel = results.basis === 'net' ? 'Net' : 'Gross';
+  const tiedLead = results.teams.filter((team) => team.rank === 1 && team.total !== null).length > 1;
+
+  return `
+    <section class="round-card round-team-results">
+      <div class="round-section-heading">
+        <div>
+          <p class="round-eyebrow">Team Results</p>
+          <h2>${escapeHtml(formatLabel)}</h2>
+        </div>
+        <span class="round-format-pill">${escapeHtml(`${basisLabel} ${scoreLabel}`)}</span>
+      </div>
+      ${results.isBasisFallback ? '<p class="round-team-note">Net results could not be reconstructed for this shared round, so gross scores are shown.</p>' : ''}
+      <div class="round-team-grid">
+        ${results.teams.map((team) => teamCardMarkup(team, results.scorecardMode, tiedLead)).join('')}
+      </div>
+    </section>
+  `;
+}
+
+function teamCardMarkup(team, scorecardMode, tiedLead) {
+  const resultText = team.total === null
+    ? '-'
+    : scorecardMode === 'stableford'
+      ? `${team.total} pts`
+      : `${team.total}${typeof team.toPar === 'number' ? ` (${formatToPar(team.toPar)})` : ''}`;
+  const rankText = team.total === null
+    ? 'No score'
+    : team.rank === 1 && tiedLead
+      ? 'Tied lead'
+      : team.rank === 1
+        ? 'Winner'
+        : ordinal(team.rank);
+  const memberNames = team.members.map((member) => member.name).join(' · ');
+
+  return `
+    <article class="round-team-card ${team.rank === 1 && team.total !== null ? 'round-team-card-leading' : ''}">
+      <div class="round-team-card-heading">
+        <span class="round-team-rank">${escapeHtml(rankText)}</span>
+        <strong>${escapeHtml(team.name)}</strong>
+      </div>
+      <span class="round-team-score">${escapeHtml(resultText)}</span>
+      <span class="round-team-members">${escapeHtml(memberNames)}</span>
+      <span class="round-team-holes">${escapeHtml(`${team.completedHoleCount} holes scored`)}</span>
+    </article>
+  `;
+}
+
+function ordinal(value) {
+  const remainder100 = value % 100;
+  if (remainder100 >= 11 && remainder100 <= 13) return `${value}th`;
+  if (value % 10 === 1) return `${value}st`;
+  if (value % 10 === 2) return `${value}nd`;
+  if (value % 10 === 3) return `${value}rd`;
+  return `${value}th`;
 }
 
 function logoMarkup() {
@@ -190,6 +253,7 @@ function scoreCellMarkup(hole) {
 function buildScorecard(round) {
   const holes = scorecardHoles(round);
   return {
+    holes,
     sections: groupedSections(holes),
     metrics: playerMetrics(holes),
   };
@@ -203,6 +267,13 @@ function scorecardHoles(round) {
   const puttsByHole = intMapFrom(metadata.putts_by_hole ?? metadata.puttsByHole);
   const breakdownById = new Map();
   const breakdownByHoleNumber = new Map();
+  const courseHoleByNumber = new Map(
+    (Array.isArray(round.courseHoles) ? round.courseHoles : []).flatMap((hole) => {
+      if (!isRecord(hole)) return [];
+      const holeNumber = intField(hole, ['holeNumber', 'hole_number', 'number']);
+      return holeNumber ? [[holeNumber, hole]] : [];
+    }),
+  );
 
   breakdownSources.forEach(({ record, fallbackHoleNumber }) => {
     const id = stringField(record, ['id']);
@@ -218,6 +289,7 @@ function scorecardHoles(round) {
       const holeNumber = intField(record, ['hole_number', 'holeNumber', 'hole', 'number']) ?? fallbackHoleNumber ?? index + 1;
       const id = stringField(record, ['id']) ?? `hole-${holeNumber}`;
       const breakdown = breakdownById.get(id) ?? breakdownByHoleNumber.get(holeNumber);
+      const courseHole = courseHoleByNumber.get(holeNumber);
       const par = intField(record, ['par']) ?? intField(breakdown, ['par']) ?? 4;
       const score = scoreByHole[id] ?? intField(breakdown, ['score', 'strokes', 'gross_score', 'grossScore']) ?? null;
       const putts = puttsByHole[id] ?? intField(breakdown, ['putts', 'putt_count', 'puttCount']) ?? null;
@@ -232,6 +304,8 @@ function scorecardHoles(round) {
         holeNumber,
         nineName,
         par,
+        strokeIndex: intField(record, ['stroke_index', 'strokeIndex', 'index']) ??
+          intField(courseHole, ['stroke_index', 'strokeIndex', 'index']),
         score,
         putts,
       };
