@@ -40,6 +40,7 @@ function renderError(message) {
       <p class="round-muted">${escapeHtml(message)}</p>
       ${actionsMarkup()}
     </section>
+    ${downloadModalMarkup()}
   `;
 }
 
@@ -55,6 +56,7 @@ function statusCard(title) {
 
 function renderRound(round) {
   let scorecard = buildScorecard(round, roundViewState.selectedPlayerId);
+  const ownerScorecard = buildScorecard(round);
   const playerResults = window.AutoStrikeTeamResults?.buildIndividualResults(
     round,
     scorecard.holes,
@@ -66,7 +68,7 @@ function renderRound(round) {
   }
   const selectedResult = playerResults?.individualResults.find((player) => player.id === roundViewState.selectedPlayerId) || null;
   const scoredSections = sectionsWithPlayerResults(scorecard.sections, selectedResult);
-  const metrics = scorecard.metrics || emptyMetrics();
+  const metrics = ownerScorecard.metrics || emptyMetrics();
   const teamResults = window.AutoStrikeTeamResults?.buildTeamResults(round, scorecard.holes) || null;
   const totalScore = metrics.totalScore ?? round.totalScore;
   const totalScoreText = numberText(totalScore);
@@ -125,7 +127,7 @@ function renderRound(round) {
 
     <section class="round-card round-individual-stats">
       <p class="round-eyebrow">Individual Stats</p>
-      <h2>${escapeHtml(`${scorecard.playerName}'s round`)}</h2>
+      <h2>${escapeHtml(`${ownerScorecard.playerName}'s round`)}</h2>
       <div class="round-stats-grid">
         ${metricMarkup('Score', `${totalScoreText} (${toParText})`)}
         ${metricMarkup('Holes Played', String(metrics.scoredHoleCount))}
@@ -137,6 +139,8 @@ function renderRound(round) {
         ${metricMarkup('Double+', String(metrics.doubleBogeyOrWorseCount))}
       </div>
     </section>
+
+    ${downloadModalMarkup()}
   `;
   bindRoundInteractions();
 }
@@ -275,7 +279,7 @@ function playerLeaderboardMarkup(results, selectedPlayerId) {
           player.id === selectedPlayerId,
         )).join('')}
       </div>
-      <p class="round-player-hint">Select a player to view their scorecard and stats.</p>
+      <p class="round-player-hint">Select a player to view their scorecard.</p>
     </section>
   `;
 }
@@ -349,12 +353,17 @@ function actionsMarkup() {
     <div class="round-actions">
       <a class="round-button round-button-primary" href="${APP_STORE_URL}" onclick="return handleDownloadClick(event)">Download AutoStrike</a>
     </div>
+  `;
+}
+
+function downloadModalMarkup() {
+  return `
     <div class="round-modal-overlay" id="round-download-modal" onclick="closeRoundModal(event)">
-      <div class="round-modal">
-        <button class="round-modal-close" onclick="closeRoundModal()">&times;</button>
-        <h2>AutoStrike Golf</h2>
+      <div class="round-modal" role="dialog" aria-modal="true" aria-labelledby="round-download-title">
+        <button class="round-modal-close" type="button" aria-label="Close download popup" onclick="closeRoundModal()">&times;</button>
+        <h2 id="round-download-title">AutoStrike Golf</h2>
         <p>Scan with your iPhone camera to open or install</p>
-        <div class="round-modal-qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=8&data=https%3A%2F%2Fapps.apple.com%2Fus%2Fapp%2Fautostrike-golf%2Fid6762587973" alt="QR Code for App Store"></div>
+        <div class="round-modal-qr"><img src="/app-store-qr.png" alt="QR Code for App Store"></div>
         <a href="${APP_STORE_URL}" target="_blank" rel="noopener">
           <img src="/app-store-badge.svg" alt="Download on the App Store" style="height:44px">
         </a>
@@ -760,22 +769,26 @@ function escapeHtml(value) {
 
 // ── Download modal (same behavior as landing page) ──
 function handleDownloadClick(event) {
-  if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (isIOS) {
     return true; // follow the href to App Store
   }
   event.preventDefault();
   document.getElementById('round-download-modal').classList.add('open');
+  document.body.classList.add('round-modal-open');
   return false;
 }
 
 function closeRoundModal(event) {
   if (event && event.target !== event.currentTarget) return;
   document.getElementById('round-download-modal').classList.remove('open');
+  document.body.classList.remove('round-modal-open');
 }
 
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
     const modal = document.getElementById('round-download-modal');
-    if (modal) modal.classList.remove('open');
+    if (modal) closeRoundModal();
   }
 });

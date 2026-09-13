@@ -38,5 +38,30 @@ test('player leaderboard exposes scoring, handicap, and player-selection control
   assert.match(source, /data-scorecard-mode/);
   assert.match(source, /data-scorecard-basis/);
   assert.match(source, /data-player-id/);
-  assert.match(source, /Select a player to view their scorecard and stats/);
+  assert.match(source, /Select a player to view their scorecard\./);
+  assert.match(source, /const ownerScorecard = buildScorecard\(round\)/);
+  assert.match(source, /ownerScorecard\.playerName/);
+});
+
+test('download popup sits outside filtered cards and iOS follows the App Store link', async () => {
+  const [source, css, qrCode] = await Promise.all([
+    readFile(new URL('../round/round.js', `file://${__filename}`), 'utf8'),
+    readFile(new URL('../round/round.css', `file://${__filename}`), 'utf8'),
+    readFile(new URL('../app-store-qr.png', `file://${__filename}`)),
+  ]);
+  const renderStart = source.indexOf('root.innerHTML = `');
+  const downloadCard = source.indexOf('round-download-card', renderStart);
+  const individualStats = source.indexOf('round-individual-stats', renderStart);
+  const modal = source.indexOf('${downloadModalMarkup()}', individualStats);
+
+  assert.ok(downloadCard > renderStart);
+  assert.ok(individualStats > downloadCard);
+  assert.ok(modal > individualStats);
+  assert.match(source, /iPhone\|iPad\|iPod/);
+  assert.match(source, /navigator\.platform === 'MacIntel'/);
+  assert.match(source, /return true; \/\/ follow the href to App Store/);
+  assert.match(css, /max-height: calc\(100dvh - 32px\)/);
+  assert.match(css, /body\.round-modal-open/);
+  assert.match(source, /src="\/app-store-qr\.png"/);
+  assert.ok(qrCode.length > 0);
 });

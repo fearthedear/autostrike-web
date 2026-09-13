@@ -283,7 +283,35 @@
     const unit = scorecardMode === 'stableford' ? 'point' : 'stroke';
     const before = scorePosition(biggest.beforeWinner, biggest.beforeLoser, scorecardMode);
     const after = scorePosition(biggest.afterWinner, biggest.afterLoser, scorecardMode);
-    return `${playerText} the biggest one-hole swing on ${holeLabel(winnerHole, biggest.index)}, a ${biggest.swing}-${unit} gain that took ${biggest.winner.displayName} from ${before} to ${after}.`;
+    let sentence = `${playerText} the biggest one-hole swing on ${holeLabel(winnerHole, biggest.index)}, a ${biggest.swing}-${unit} gain that took ${biggest.winner.displayName} from ${before} to ${after}`;
+    const widest = widestLead(first, second, scorecardMode);
+    const afterMargin = Math.abs(scoreMargin(biggest.afterWinner, biggest.afterLoser, scorecardMode));
+    if (widest?.team.id === biggest.winner.id && widest.index > biggest.index && widest.margin > afterMargin) {
+      const marginUnit = widest.margin === 1 ? unit : `${unit}s`;
+      sentence += `; ${widest.team.displayName} then stretched that advantage to ${widest.margin} ${marginUnit} on ${holeLabel(widest.hole, widest.index)}`;
+    }
+    return `${sentence}.`;
+  }
+
+  function widestLead(first, second, scorecardMode) {
+    let firstTotal = 0;
+    let secondTotal = 0;
+    let widest = null;
+    const holeCount = Math.min(first.holeResults.length, second.holeResults.length);
+    for (let index = 0; index < holeCount; index += 1) {
+      firstTotal += typeof first.holeResults[index]?.value === 'number' ? first.holeResults[index].value : 0;
+      secondTotal += typeof second.holeResults[index]?.value === 'number' ? second.holeResults[index].value : 0;
+      const margin = scoreMargin(firstTotal, secondTotal, scorecardMode);
+      if (margin !== 0 && (!widest || Math.abs(margin) > widest.margin)) {
+        widest = {
+          team: margin > 0 ? first : second,
+          margin: Math.abs(margin),
+          index,
+          hole: first.holeResults[index] ?? second.holeResults[index],
+        };
+      }
+    }
+    return widest;
   }
 
   function comebackSentence(first, second, scorecardMode, startIndex) {
@@ -360,8 +388,12 @@
     return best;
   }
 
+  function scoreMargin(teamScore, opponentScore, scorecardMode) {
+    return scorecardMode === 'stableford' ? teamScore - opponentScore : opponentScore - teamScore;
+  }
+
   function scorePosition(teamScore, opponentScore, scorecardMode) {
-    const margin = scorecardMode === 'stableford' ? teamScore - opponentScore : opponentScore - teamScore;
+    const margin = scoreMargin(teamScore, opponentScore, scorecardMode);
     if (margin === 0) return 'level';
     const singular = scorecardMode === 'stableford' ? 'point' : 'stroke';
     const unit = Math.abs(margin) === 1 ? singular : `${singular}s`;
