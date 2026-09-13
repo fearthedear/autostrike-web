@@ -43,6 +43,21 @@ test('player leaderboard exposes scoring, handicap, and player-selection control
   assert.match(source, /ownerScorecard\.playerName/);
 });
 
+test('scorecards label holes by play order and separate date from tee metadata', async () => {
+  const [source, css] = await Promise.all([
+    readFile(new URL('../round/round.js', `file://${__filename}`), 'utf8'),
+    readFile(new URL('../round/round.css', `file://${__filename}`), 'utf8'),
+  ]);
+
+  assert.match(source, /playedNumber: index \+ 1/);
+  assert.match(source, /String\(hole\.playedNumber\)/);
+  assert.match(source, /class="round-played-on"/);
+  assert.match(source, /<span>Played on<\/span><strong>/);
+  assert.match(source, /class="round-tee-pill"/);
+  assert.match(source, /\$\{escapeHtml\(teeText\)\} tees/);
+  assert.match(css, /\.round-meta \{[\s\S]*flex-direction: column/);
+});
+
 test('download popup sits outside filtered cards and iOS follows the App Store link', async () => {
   const [source, css, qrCode] = await Promise.all([
     readFile(new URL('../round/round.js', `file://${__filename}`), 'utf8'),

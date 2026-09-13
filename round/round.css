@@ -44,8 +44,7 @@
 }
 
 .round-logo strong,
-.round-eyebrow,
-.round-meta strong {
+.round-eyebrow {
   color: var(--gold);
 }
 
@@ -93,10 +92,41 @@
 
 .round-meta {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.round-played-on {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.round-played-on > span {
   color: var(--text-muted);
-  font-weight: 650;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.round-played-on strong {
+  color: var(--text);
+  font-size: 1.05rem;
+}
+
+.round-tee-pill {
+  display: inline-flex;
+  padding: 6px 10px;
+  border: 1px solid rgba(201, 169, 110, 0.34);
+  border-radius: 999px;
+  background: rgba(201, 169, 110, 0.1);
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .round-score {

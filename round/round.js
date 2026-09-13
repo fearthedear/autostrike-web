@@ -97,8 +97,8 @@ function renderRound(round) {
         <p class="round-eyebrow">AutoStrike Golf round</p>
         <h1>${escapeHtml(round.courseName || 'AutoStrike round')}</h1>
         <div class="round-meta">
-          ${teeText ? `<span><strong>Tees played:</strong> ${escapeHtml(teeText)}</span>` : ''}
-          <span>${escapeHtml(formatPlayedOn(round.playedOn))}</span>
+          <span class="round-played-on"><span>Played on</span><strong>${escapeHtml(formatPlayedOn(round.playedOn))}</strong></span>
+          ${teeText ? `<span class="round-tee-pill">${escapeHtml(teeText)} tees</span>` : ''}
         </div>
       </div>
       ${heroScoreMarkup}
@@ -387,7 +387,7 @@ function scorecardSectionMarkup(section, playerName, scorecardMode, basis) {
   return `
     <div class="round-scorecard-section">
       <h3>${escapeHtml(section.title)}</h3>
-      ${scorecardRowMarkup('Hole', section.holes, (hole) => escapeHtml(String(hole.holeNumber)), 'Tot', true)}
+      ${scorecardRowMarkup('Hole', section.holes, (hole) => escapeHtml(String(hole.playedNumber)), 'Tot', true)}
       ${scorecardRowMarkup('Par', section.holes, (hole) => escapeHtml(String(hole.par)), sumText(section.holes, 'par'), true)}
       ${scorecardRowMarkup('Strokes', section.holes, scoreCellMarkup, sumText(section.holes, 'score'))}
       ${showNet ? scorecardRowMarkup('Net', section.holes, netScoreCellMarkup, sumText(section.holes, 'adjustedScore'), true) : ''}
@@ -539,7 +539,8 @@ function scorecardHoles(round, playerId = null) {
         putts,
       };
     })
-    .sort((left, right) => left.sequence - right.sequence || left.holeNumber - right.holeNumber);
+    .sort((left, right) => left.sequence - right.sequence || left.holeNumber - right.holeNumber)
+    .map((hole, index) => ({ ...hole, playedNumber: index + 1 }));
 }
 
 function groupedSections(holes) {

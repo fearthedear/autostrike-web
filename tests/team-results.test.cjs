@@ -117,7 +117,13 @@ test('the supplied KGPA round produces the expected team leaderboard', () => {
       },
     },
   };
-  const kgpaHoles = ids.map((id, index) => ({ id, par: pars[index], strokeIndex: strokeIndexes[index] }));
+  const kgpaHoles = ids.map((id, index) => ({
+    id,
+    par: pars[index],
+    strokeIndex: strokeIndexes[index],
+    holeNumber: 19 + (index % 9),
+    playedNumber: index + 1,
+  }));
 
   const result = buildTeamResults(round, kgpaHoles);
   assert.deepEqual(result.teams.map((team) => [team.name, team.total, team.rank]), [
@@ -132,7 +138,10 @@ test('the supplied KGPA round produces the expected team leaderboard', () => {
   assert.match(result.summarySentences[0], /finished all square at 44–44/i);
   assert.match(result.summarySentences[2], /biggest one-hole swing/i);
   assert.match(result.summarySentences[2], /stretched that advantage to 3 points/i);
+  assert.match(result.summarySentences[2], /on hole 13/i);
+  assert.doesNotMatch(result.summarySentences.join(' '), /hole 2[0-7]/i);
   assert.match(result.summarySentences[3], /Toby then counted on 5 straight holes/i);
+  assert.match(result.summarySentences[4], /on hole 18/i);
   assert.match(result.summarySentences[4], /to square the match at 44–44/i);
 });
 

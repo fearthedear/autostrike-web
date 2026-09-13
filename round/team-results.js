@@ -229,7 +229,7 @@
     const lastIndex = Math.min(first.holeResults.length, second.holeResults.length) - 1;
     const firstLast = first.holeResults[lastIndex]?.value;
     const secondLast = second.holeResults[lastIndex]?.value;
-    const finalHoleNumber = first.holeResults[lastIndex]?.holeNumber ?? lastIndex + 1;
+    const finalHoleNumber = first.holeResults[lastIndex]?.playedNumber ?? lastIndex + 1;
     const finalIsTie = first.total === second.total;
     const lastHoleWinner = typeof firstLast === 'number' && typeof secondLast === 'number' && firstLast !== secondLast
       ? (compareScores(firstLast, secondLast, scorecardMode) < 0 ? first : second)
@@ -374,11 +374,11 @@
     holes.forEach((hole, index) => {
       if (index >= startIndex && (hole.contributorIds || []).includes(playerId)) {
         if (current.length === 0) {
-          current.startHole = hole.holeNumber;
+          current.startHole = hole.playedNumber ?? index + 1;
           current.startIndex = index;
         }
         current.length += 1;
-        current.endHole = hole.holeNumber;
+        current.endHole = hole.playedNumber ?? index + 1;
         current.endIndex = index;
         if (current.length > best.length) best = { ...current };
       } else {
@@ -401,7 +401,7 @@
   }
 
   function holeLabel(hole, index) {
-    return `hole ${hole?.holeNumber ?? index + 1}`;
+    return `hole ${hole?.playedNumber ?? index + 1}`;
   }
 
   function rankResults(entries, scorecardMode, nameKey) {
@@ -481,6 +481,7 @@
       holeId: hole.id,
       holeIndex,
       holeNumber: positiveInteger(hole.holeNumber) ?? holeIndex + 1,
+      playedNumber: positiveInteger(hole.playedNumber) ?? holeIndex + 1,
       value: null,
       par: hole.par,
       contributorIds: [],
