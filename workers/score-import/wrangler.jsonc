@@ -10,6 +10,9 @@
   "routes": [
     { "pattern": "score-import.autostrikegolf.com/*", "zone_name": "autostrikegolf.com" }
   ],
+  "triggers": {
+    "crons": ["* * * * *"]
+  },
   "vars": {
     "SUPABASE_URL": "https://iibpcgmvpocijlsfrkor.supabase.co",
     "OPENAI_MODEL": "gpt-5",

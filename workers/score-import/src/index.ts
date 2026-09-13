@@ -324,7 +324,26 @@ export default {
     }
     return new Response("not found", { status: 404 });
   },
+  async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
+    ctx.waitUntil(generateRecentCompletedTeamRoundSummaries(env));
+  },
 };
+
+async function generateRecentCompletedTeamRoundSummaries(env: Env): Promise<void> {
+  const scores = await fetchRecentScores(env, 100);
+  const pending = scores
+    .filter((score) => isCompletedTeamRound(score))
+    .filter((score) => !validStoredSummary(score.metadata?.ai_round_summary))
+    .filter((score) => Number(score.metadata?.ai_round_summary_attempts ?? 0) < 3)
+    .slice(0, 3);
+  for (const score of pending) {
+    try {
+      await processTeamRoundSummary(env, String(score.id));
+    } catch (error: any) {
+      console.error(`scheduled team summary ${score.id} failed`, error?.message ?? error);
+    }
+  }
+}
 
 async function processTeamRoundSummary(
   env: Env,
@@ -337,6 +356,15 @@ async function processTeamRoundSummary(
   const metadata = score.metadata && typeof score.metadata === "object" ? score.metadata : {};
   if (validStoredSummary(metadata.ai_round_summary)) return { status: "already_generated" };
 
+  const attempts = Number(metadata.ai_round_summary_attempts ?? 0);
+  if (Number.isFinite(attempts) && attempts >= 3) return { status: "generation_exhausted" };
+  const generationMetadata = {
+    ...metadata,
+    ai_round_summary_attempts: (Number.isFinite(attempts) ? attempts : 0) + 1,
+    ai_round_summary_last_attempt_at: new Date().toISOString(),
+  };
+  await patchScoreMetadata(env, scoreId, generationMetadata);
+
   const courseHoles = await fetchCourseHoles(env, score.course_id);
   const factPacket = buildTeamRoundFactPacket(score, courseHoles);
   if (!factPacket) return { status: "insufficient_round_data" };
@@ -347,7 +375,8 @@ async function processTeamRoundSummary(
   if (!validated) throw new Error("OpenAI returned an invalid team-round summary");
 
   await patchScoreMetadata(env, scoreId, {
-    ...metadata,
+    ...generationMetadata,
+    ai_round_summary_error: null,
     ai_round_summary: {
       version: TEAM_ROUND_SUMMARY_VERSION,
       model,
@@ -661,6 +690,17 @@ async function fetchCourseHoles(env: Env, courseId: string): Promise<unknown[]> 
   if (!r.ok) throw new Error(`fetchCourseHoles failed ${r.status}: ${truncate(await r.text(), 400)}`);
   const rows = (await r.json()) as any[];
   return Array.isArray(rows[0]?.holes) ? rows[0].holes : [];
+}
+
+async function fetchRecentScores(env: Env, limit: number): Promise<any[]> {
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const fields = ["id", "user_id", "course_id", "course_name", "played_on", "metadata"].join(",");
+  const r = await fetch(
+    `${env.SUPABASE_URL}/rest/v1/scores?created_at=gte.${encodeURIComponent(since)}&select=${fields}&order=created_at.desc&limit=${limit}`,
+    { headers: srHeaders(env) },
+  );
+  if (!r.ok) throw new Error(`fetchRecentScores failed ${r.status}: ${truncate(await r.text(), 400)}`);
+  return (await r.json()) as any[];
 }
 
 async function patchScoreMetadata(env: Env, id: string, metadata: Record<string, any>): Promise<void> {
