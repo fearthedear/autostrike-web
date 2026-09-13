@@ -2,6 +2,8 @@ const APP_STORE_URL = 'https://apps.apple.com/us/app/autostrike-golf/id676258797
 
 const root = document.getElementById('round-root');
 const roundId = new URLSearchParams(window.location.search).get('id')?.trim() || '';
+let activeRound = null;
+let roundViewState = { scorecardMode: 'stroke_play', basis: 'gross', selectedPlayerId: null };
 
 if (!roundId) {
   renderError('This round link is missing a round ID.');
@@ -17,6 +19,8 @@ async function loadRound(id) {
     if (!response.ok || !payload.round) {
       throw new Error(payload.error || 'Round not found.');
     }
+    activeRound = payload.round;
+    roundViewState = initialRoundViewState(activeRound);
     renderRound(payload.round);
   } catch (error) {
     renderError(error instanceof Error ? error.message : 'Could not load this round.');
@@ -50,7 +54,18 @@ function statusCard(title) {
 }
 
 function renderRound(round) {
-  const scorecard = buildScorecard(round);
+  let scorecard = buildScorecard(round, roundViewState.selectedPlayerId);
+  const playerResults = window.AutoStrikeTeamResults?.buildIndividualResults(
+    round,
+    scorecard.holes,
+    roundViewState,
+  ) || null;
+  if (playerResults?.individualResults.length && !playerResults.individualResults.some((player) => player.id === roundViewState.selectedPlayerId)) {
+    roundViewState.selectedPlayerId = playerResults.individualResults[0].id;
+    scorecard = buildScorecard(round, roundViewState.selectedPlayerId);
+  }
+  const selectedResult = playerResults?.individualResults.find((player) => player.id === roundViewState.selectedPlayerId) || null;
+  const scoredSections = sectionsWithPlayerResults(scorecard.sections, selectedResult);
   const metrics = scorecard.metrics || emptyMetrics();
   const teamResults = window.AutoStrikeTeamResults?.buildTeamResults(round, scorecard.holes) || null;
   const totalScore = metrics.totalScore ?? round.totalScore;
@@ -58,8 +73,13 @@ function renderRound(round) {
   const toParValue = metrics.toPar ?? round.toPar;
   const toParText = typeof toParValue === 'number' ? formatToPar(toParValue) : '-';
   const teeText = teeBoxDisplayText(round);
-  const sectionsMarkup = scorecard.sections.length
-    ? scorecard.sections.map((section) => scorecardSectionMarkup(section, scorecard.playerName)).join('')
+  const sectionsMarkup = scoredSections.length
+    ? scoredSections.map((section) => scorecardSectionMarkup(
+      section,
+      scorecard.playerName,
+      roundViewState.scorecardMode,
+      roundViewState.basis,
+    )).join('')
     : '<p class="round-muted">Hole-by-hole details are unavailable for this round.</p>';
   const heroScoreMarkup = teamResults ? '' : `
       <div class="round-score">
@@ -86,7 +106,24 @@ function renderRound(round) {
 
     ${teamResults ? teamSummaryMarkup(teamResults) : ''}
 
+    ${playerResults?.individualResults.length ? playerLeaderboardMarkup(playerResults, roundViewState.selectedPlayerId) : ''}
+
     <section class="round-card">
+      <p class="round-eyebrow">Scorecard</p>
+      <h2>${escapeHtml(`${scorecard.playerName}'s scorecard`)}</h2>
+      <div class="round-scorecard-stack">${sectionsMarkup}</div>
+    </section>
+
+    <section class="round-card round-download-card">
+      <div>
+        <p class="round-eyebrow">Play smarter golf</p>
+        <h2>Track your next round with AutoStrike</h2>
+        <p class="round-muted">Shot tracking, smart club suggestions, scorecards, and round summaries built for iPhone and Apple Watch.</p>
+      </div>
+      ${actionsMarkup()}
+    </section>
+
+    <section class="round-card round-individual-stats">
       <p class="round-eyebrow">Individual Stats</p>
       <h2>${escapeHtml(`${scorecard.playerName}'s round`)}</h2>
       <div class="round-stats-grid">
@@ -100,24 +137,49 @@ function renderRound(round) {
         ${metricMarkup('Double+', String(metrics.doubleBogeyOrWorseCount))}
       </div>
     </section>
-
-    <section class="round-card">
-      <p class="round-eyebrow">Scorecard</p>
-      <h2>${escapeHtml(`${scorecard.playerName} · Hole by hole`)}</h2>
-      <div class="round-scorecard-stack">${sectionsMarkup}</div>
-    </section>
-
-    ${teamResults ? individualResultsMarkup(teamResults) : ''}
-
-    <section class="round-card round-download-card">
-      <div>
-        <p class="round-eyebrow">Play smarter golf</p>
-        <h2>Track your next round with AutoStrike</h2>
-        <p class="round-muted">Shot tracking, smart club suggestions, scorecards, and round summaries built for iPhone and Apple Watch.</p>
-      </div>
-      ${actionsMarkup()}
-    </section>
   `;
+  bindRoundInteractions();
+}
+
+function initialRoundViewState(round) {
+  const metadata = isRecord(round.metadata) ? round.metadata : {};
+  const scorecardMode = normalizedMode(
+    metadata.multiplayer_scorecard_mode ?? metadata.multiplayerScorecardMode,
+    ['stableford', 'stroke_play'],
+    'stroke_play',
+  );
+  const basis = normalizedMode(
+    metadata.multiplayer_scorecard_basis ?? metadata.multiplayerScorecardBasis,
+    ['net', 'gross'],
+    'gross',
+  );
+  return { scorecardMode, basis, selectedPlayerId: null };
+}
+
+function normalizedMode(value, allowed, fallback) {
+  const token = typeof value === 'string' ? value.trim().toLowerCase().replace(/[ -]+/g, '_') : '';
+  return allowed.includes(token) ? token : fallback;
+}
+
+function bindRoundInteractions() {
+  root.querySelectorAll('[data-player-id]').forEach((button) => {
+    button.addEventListener('click', () => {
+      roundViewState.selectedPlayerId = button.dataset.playerId || null;
+      renderRound(activeRound);
+    });
+  });
+  root.querySelectorAll('[data-scorecard-mode]').forEach((button) => {
+    button.addEventListener('click', () => {
+      roundViewState.scorecardMode = button.dataset.scorecardMode;
+      renderRound(activeRound);
+    });
+  });
+  root.querySelectorAll('[data-scorecard-basis]').forEach((button) => {
+    button.addEventListener('click', () => {
+      roundViewState.basis = button.dataset.scorecardBasis;
+      renderRound(activeRound);
+    });
+  });
 }
 
 function teamResultsMarkup(results) {
@@ -185,27 +247,58 @@ function teamSummaryMarkup(results) {
   `;
 }
 
-function individualResultsMarkup(results) {
+function playerLeaderboardMarkup(results, selectedPlayerId) {
   const tiedLead = results.individualResults.filter((player) => player.rank === 1 && player.total !== null).length > 1;
-  const scoreLabel = results.scorecardMode === 'stableford' ? 'Stableford' : 'Stroke play';
-  const basisLabel = results.basis === 'net' ? 'Net' : 'Gross';
   return `
     <section class="round-card round-individual-results">
       <div class="round-section-heading">
         <div>
-          <p class="round-eyebrow">Individual Results</p>
+          <p class="round-eyebrow">Players</p>
           <h2>Player leaderboard</h2>
         </div>
-        <span class="round-format-pill">${escapeHtml(`${basisLabel} ${scoreLabel}`)}</span>
+        <div class="round-view-controls" aria-label="Leaderboard scoring options">
+          ${segmentedControlMarkup('Scoring', [
+            { value: 'stableford', label: 'Stableford' },
+            { value: 'stroke_play', label: 'Stroke' },
+          ], results.scorecardMode, 'scorecard-mode')}
+          ${segmentedControlMarkup('Handicap', [
+            { value: 'net', label: 'On' },
+            { value: 'gross', label: 'Off' },
+          ], results.basis, 'scorecard-basis')}
+        </div>
       </div>
       <div class="round-individual-list">
-        ${results.individualResults.map((player) => individualResultMarkup(player, results.scorecardMode, tiedLead)).join('')}
+        ${results.individualResults.map((player) => individualResultMarkup(
+          player,
+          results.scorecardMode,
+          tiedLead,
+          player.id === selectedPlayerId,
+        )).join('')}
       </div>
+      <p class="round-player-hint">Select a player to view their scorecard and stats.</p>
     </section>
   `;
 }
 
-function individualResultMarkup(player, scorecardMode, tiedLead) {
+function segmentedControlMarkup(label, options, selectedValue, dataAttribute) {
+  return `
+    <div class="round-control-group">
+      <span>${escapeHtml(label)}</span>
+      <div class="round-segmented" role="group" aria-label="${escapeHtml(label)}">
+        ${options.map((option) => `
+          <button
+            type="button"
+            data-${dataAttribute}="${escapeHtml(option.value)}"
+            class="${option.value === selectedValue ? 'is-active' : ''}"
+            aria-pressed="${option.value === selectedValue ? 'true' : 'false'}"
+          >${escapeHtml(option.label)}</button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function individualResultMarkup(player, scorecardMode, tiedLead, isSelected) {
   const resultText = player.total === null
     ? '-'
     : scorecardMode === 'stableford'
@@ -219,12 +312,17 @@ function individualResultMarkup(player, scorecardMode, tiedLead) {
         ? '1st'
         : ordinal(player.rank);
   return `
-    <article class="round-individual-row ${player.rank === 1 && player.total !== null ? 'round-individual-row-leading' : ''}">
+    <button
+      type="button"
+      class="round-individual-row ${player.rank === 1 && player.total !== null ? 'round-individual-row-leading' : ''} ${isSelected ? 'round-individual-row-selected' : ''}"
+      data-player-id="${escapeHtml(player.id)}"
+      aria-pressed="${isSelected ? 'true' : 'false'}"
+    >
       <span class="round-individual-rank">${escapeHtml(rankText)}</span>
       <strong>${escapeHtml(player.name)}</strong>
       <span class="round-individual-handicap">${escapeHtml(`Playing handicap ${player.playingHandicap}`)}</span>
       <span class="round-individual-score">${escapeHtml(resultText)}</span>
-    </article>
+    </button>
   `;
 }
 
@@ -274,13 +372,17 @@ function metricMarkup(label, value) {
   `;
 }
 
-function scorecardSectionMarkup(section, playerName) {
+function scorecardSectionMarkup(section, playerName, scorecardMode, basis) {
+  const showNet = basis === 'net';
+  const showPoints = scorecardMode === 'stableford';
   return `
     <div class="round-scorecard-section">
       <h3>${escapeHtml(section.title)}</h3>
       ${scorecardRowMarkup('Hole', section.holes, (hole) => escapeHtml(String(hole.holeNumber)), 'Tot', true)}
       ${scorecardRowMarkup('Par', section.holes, (hole) => escapeHtml(String(hole.par)), sumText(section.holes, 'par'), true)}
-      ${scorecardRowMarkup(playerName, section.holes, scoreCellMarkup, sumText(section.holes, 'score'))}
+      ${scorecardRowMarkup('Strokes', section.holes, scoreCellMarkup, sumText(section.holes, 'score'))}
+      ${showNet ? scorecardRowMarkup('Net', section.holes, netScoreCellMarkup, sumText(section.holes, 'adjustedScore'), true) : ''}
+      ${showPoints ? scorecardRowMarkup('Points', section.holes, pointsCellMarkup, sumText(section.holes, 'points')) : ''}
       ${scorecardRowMarkup('Putts', section.holes, (hole) => escapeHtml(numberText(hole.putts)), sumText(section.holes, 'putts'), true)}
     </div>
   `;
@@ -314,13 +416,38 @@ function scoreCellMarkup(hole) {
   return `<span class="round-score-mark ${className}">${escapeHtml(String(hole.score))}</span>`;
 }
 
-function buildScorecard(round) {
-  const holes = scorecardHoles(round);
+function netScoreCellMarkup(hole) {
+  return escapeHtml(numberText(hole.adjustedScore));
+}
+
+function pointsCellMarkup(hole) {
+  return escapeHtml(numberText(hole.points));
+}
+
+function sectionsWithPlayerResults(sections, playerResult) {
+  const resultByHoleId = new Map((playerResult?.holeResults || []).map((hole) => [hole.holeId, hole]));
+  return sections.map((section) => ({
+    ...section,
+    holes: section.holes.map((hole) => {
+      const result = resultByHoleId.get(hole.id);
+      return {
+        ...hole,
+        adjustedScore: typeof result?.adjustedScore === 'number' ? result.adjustedScore : null,
+        points: typeof result?.value === 'number' ? result.value : null,
+      };
+    }),
+  }));
+}
+
+function buildScorecard(round, playerId = null) {
+  const holes = scorecardHoles(round, playerId);
+  const player = playerForRound(round, playerId);
   return {
     holes,
     sections: groupedSections(holes),
     metrics: playerMetrics(holes),
-    playerName: primaryPlayerName(round),
+    playerName: stringField(player, ['name']) || primaryPlayerName(round),
+    playerId: stringField(player, ['id']),
   };
 }
 
@@ -332,12 +459,32 @@ function primaryPlayerName(round) {
   return stringField(primaryPlayer, ['name']) || 'You';
 }
 
-function scorecardHoles(round) {
+function playerForRound(round, playerId) {
+  const metadata = isRecord(round.metadata) ? round.metadata : {};
+  const players = Array.isArray(metadata.players) ? metadata.players.filter(isRecord) : [];
+  const primaryPlayerId = stringField(metadata, ['primary_player_id', 'primaryPlayerId']);
+  return players.find((player) => stringField(player, ['id']) === playerId) ??
+    players.find((player) => stringField(player, ['id']) === primaryPlayerId) ??
+    players[0] ??
+    null;
+}
+
+function scorecardHoles(round, playerId = null) {
   const metadata = isRecord(round.metadata) ? round.metadata : {};
   const roundHoleSources = holeSourcesFrom(metadata.round_holes ?? metadata.roundHoles);
   const breakdownSources = holeSourcesFrom(metadata.hole_breakdown ?? metadata.holeBreakdown ?? metadata.holes);
-  const scoreByHole = intMapFrom(metadata.score_by_hole ?? metadata.scoreByHole);
-  const puttsByHole = intMapFrom(metadata.putts_by_hole ?? metadata.puttsByHole);
+  const player = playerForRound(round, playerId);
+  const primaryPlayerId = stringField(metadata, ['primary_player_id', 'primaryPlayerId']);
+  const selectedPlayerId = stringField(player, ['id']);
+  const useRoundFallback = !selectedPlayerId || selectedPlayerId === primaryPlayerId;
+  const scoreByHole = intMapFrom(
+    player?.score_by_hole ?? player?.scoreByHole ??
+    (useRoundFallback ? metadata.score_by_hole ?? metadata.scoreByHole : null),
+  );
+  const puttsByHole = intMapFrom(
+    player?.putts_by_hole ?? player?.puttsByHole ??
+    (useRoundFallback ? metadata.putts_by_hole ?? metadata.puttsByHole : null),
+  );
   const breakdownById = new Map();
   const breakdownByHoleNumber = new Map();
   const courseHoleByNumber = new Map(

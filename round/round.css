@@ -274,6 +274,63 @@
   margin-top: 18px;
 }
 
+.round-view-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.round-control-group {
+  display: grid;
+  gap: 5px;
+}
+
+.round-control-group > span {
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.round-segmented {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.round-segmented button {
+  min-height: 34px;
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.round-segmented button:hover,
+.round-segmented button:focus-visible {
+  color: var(--text);
+}
+
+.round-segmented button:focus-visible,
+.round-individual-row:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.round-segmented button.is-active {
+  background: var(--gold);
+  color: var(--green-deep);
+}
+
 .round-individual-row {
   display: grid;
   grid-template-columns: 5.5rem minmax(0, 1fr) minmax(9rem, auto) auto;
@@ -283,10 +340,27 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.045);
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.round-individual-row:hover {
+  border-color: rgba(201, 169, 110, 0.28);
+  transform: translateY(-1px);
 }
 
 .round-individual-row-leading {
   border-color: rgba(201, 169, 110, 0.34);
+}
+
+.round-individual-row-selected {
+  border-color: var(--gold);
+  background: linear-gradient(145deg, rgba(201, 169, 110, 0.18), rgba(255, 255, 255, 0.055));
+  box-shadow: inset 3px 0 0 var(--gold);
 }
 
 .round-individual-rank,
@@ -305,6 +379,12 @@
   font-size: 1.18rem;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
+}
+
+.round-player-hint {
+  margin: 12px 2px 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
 }
 
 .round-scorecard-stack {
@@ -443,6 +523,11 @@
     flex-direction: column;
   }
 
+  .round-view-controls {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
   .round-team-grid {
     grid-template-columns: 1fr;
   }
@@ -463,6 +548,15 @@
 
   .round-actions {
     flex-direction: column;
+  }
+
+  .round-control-group,
+  .round-segmented {
+    width: 100%;
+  }
+
+  .round-segmented button {
+    flex: 1;
   }
 }
 

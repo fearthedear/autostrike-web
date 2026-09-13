@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { buildTeamResults, strokeAdjustments, strokesReceived } = require('../round/team-results.js');
+const { buildTeamResults, buildIndividualResults, strokeAdjustments, strokesReceived } = require('../round/team-results.js');
 
 const holes = [
   { id: 'h1', par: 4, strokeIndex: 1 },
@@ -37,7 +37,29 @@ test('best-ball net Stableford ranks the highest team points first', () => {
     ['Team A', 10, 1],
     ['Team B', 3, 2],
   ]);
-  assert.equal(result.teams[0].displayName, 'Linus + Toby');
+  assert.equal(result.teams[0].displayName, 'Linus & Toby');
+});
+
+test('individual leaderboard can switch scoring mode and handicap basis', () => {
+  const stablefordNet = buildIndividualResults(sampleRound(), holes, {
+    scorecardMode: 'stableford',
+    basis: 'net',
+  });
+  assert.deepEqual(stablefordNet.individualResults.map((player) => [player.name, player.total]), [
+    ['Linus', 10],
+    ['Andre', 3],
+    ['Toby', 3],
+  ]);
+
+  const strokeGross = buildIndividualResults(sampleRound(), holes, {
+    scorecardMode: 'stroke_play',
+    basis: 'gross',
+  });
+  assert.deepEqual(strokeGross.individualResults.map((player) => [player.name, player.total]), [
+    ['Andre', 9],
+    ['Linus', 9],
+    ['Toby', 9],
+  ]);
 });
 
 test('gross stroke play ranks the lowest best-ball score first', () => {
@@ -84,7 +106,7 @@ test('the supplied KGPA round produces the expected team leaderboard', () => {
       players: [
         { id: 'andre', name: 'Andre', playing_handicap: 14, score_by_hole: scoreMap([4, 4, 6, 4, 4, 6, 7, 4, 8, 4, 4, 5, 3, 4, 5, 9, 3, 4]) },
         { id: 'ankur', name: 'Ankur', playing_handicap: 18, score_by_hole: scoreMap([5, 6, 10, 3, 6, 6, 6, 4, 6, 3, 4, 6, 5, 6, 5, 8, 3, 7]) },
-        { id: 'linus', name: 'Linuskinzel', playing_handicap: 15, score_by_hole: scoreMap([5, 4, 5, 4, 6, 6, 8, 5, 5, 7, 5, 5, 4, 5, 8, 7, 3, 5]) },
+        { id: 'linus', name: 'Linus', playing_handicap: 15, score_by_hole: scoreMap([5, 4, 5, 4, 6, 6, 8, 5, 5, 7, 5, 5, 4, 5, 8, 7, 3, 5]) },
         { id: 'toby', name: 'Toby', playing_handicap: 21, score_by_hole: scoreMap([6, 6, 6, 3, 5, 8, 6, 3, 5, 7, 4, 6, 4, 4, 4, 6, 3, 7]) },
       ],
       team_settings: {
@@ -103,11 +125,13 @@ test('the supplied KGPA round produces the expected team leaderboard', () => {
     ['Team A', 44, 1],
   ]);
   assert.deepEqual(result.teams.map((team) => team.displayName), [
-    'Andre + Ankur',
-    'Linuskinzel + Toby',
+    'Andre & Ankur',
+    'Linus & Toby',
   ]);
   assert.equal(result.summarySentences.length, 5);
-  assert.match(result.summarySentences[0], /finished tied on 44 points/i);
+  assert.match(result.summarySentences[0], /finished all square at 44–44/i);
+  assert.match(result.summarySentences[2], /biggest one-hole swing/i);
+  assert.match(result.summarySentences[3], /Toby then counted on 5 straight holes/i);
   assert.match(result.summarySentences[4], /to square the match at 44–44/i);
 });
 

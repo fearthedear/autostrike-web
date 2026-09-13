@@ -1,5 +1,5 @@
 (function exposeTeamResults(global) {
-  function buildTeamResults(round, holes) {
+  function buildTeamResults(round, holes, options = {}) {
     const metadata = record(round?.metadata);
     const settings = record(metadata.team_settings ?? metadata.teamSettings);
     const configuredTeams = Array.isArray(settings.teams) ? settings.teams : [];
@@ -13,11 +13,11 @@
     }
 
     const scorecardMode = normalizedToken(
-      metadata.multiplayer_scorecard_mode ?? metadata.multiplayerScorecardMode,
+      options.scorecardMode ?? metadata.multiplayer_scorecard_mode ?? metadata.multiplayerScorecardMode,
       'stroke_play',
     );
     const requestedBasis = normalizedToken(
-      metadata.multiplayer_scorecard_basis ?? metadata.multiplayerScorecardBasis,
+      options.basis ?? metadata.multiplayer_scorecard_basis ?? metadata.multiplayerScorecardBasis,
       'gross',
     );
     const scoringMode = normalizedToken(settings.scoring_mode ?? settings.scoringMode, 'best_ball');
@@ -96,7 +96,7 @@
         configuredOrder: teamIndex,
         name: storedName,
         displayName: defaultTeamName(storedName)
-          ? members.map((member) => member.name).join(' + ')
+          ? members.map((member) => member.name).join(' & ')
           : storedName,
         members,
         holeResults,
@@ -109,6 +109,38 @@
     if (teams.length === 0) return null;
 
     rankResults(teams, scorecardMode, 'displayName');
+
+    const individualResults = buildIndividualResults(round, holes, { scorecardMode, basis }).individualResults;
+
+    const results = {
+      teams,
+      individualResults,
+      holes,
+      scorecardMode,
+      scoringMode,
+      requestedBasis,
+      basis,
+      isBasisFallback: false,
+    };
+    results.summarySentences = buildTeamSummary(results);
+    return results;
+  }
+
+  function buildIndividualResults(round, holes, options = {}) {
+    const metadata = record(round?.metadata);
+    const players = Array.isArray(metadata.players) ? metadata.players.filter(isRecord).map(normalizePlayer) : [];
+    const scorecardMode = normalizedToken(
+      options.scorecardMode ?? metadata.multiplayer_scorecard_mode ?? metadata.multiplayerScorecardMode,
+      'stroke_play',
+    );
+    const basis = normalizedToken(
+      options.basis ?? metadata.multiplayer_scorecard_basis ?? metadata.multiplayerScorecardBasis,
+      'gross',
+    ) === 'net' ? 'net' : 'gross';
+    const adjustmentsByPlayerId = new Map(players.map((player) => [
+      player.id,
+      strokeAdjustments(player.playingHandicap, holes),
+    ]));
 
     const individualResults = players.map((player, configuredOrder) => {
       const adjustments = adjustmentsByPlayerId.get(player.id) || [];
@@ -144,18 +176,12 @@
     });
     rankResults(individualResults, scorecardMode, 'name');
 
-    const results = {
-      teams,
+    return {
       individualResults,
       holes,
       scorecardMode,
-      scoringMode,
-      requestedBasis,
       basis,
-      isBasisFallback: false,
     };
-    results.summarySentences = buildTeamSummary(results);
-    return results;
   }
 
   function buildTeamSummary(results) {
@@ -171,7 +197,7 @@
     const sentences = [];
 
     if (tiedLeaders.length > 1) {
-      sentences.push(`${joinNames(tiedLeaders.map((team) => team.displayName))} finished tied on ${scoreText(teams[0].total)} in a ${format} contest.`);
+      sentences.push(`The match finished all square at ${teams[0].total}–${teams[1].total}, leaving ${tiedLeaders[0].displayName} level with ${tiedLeaders[1].displayName} after a ${format} contest.`);
     } else {
       const runnerUp = teams[1];
       const margin = Math.abs(teams[0].total - runnerUp.total);
@@ -192,10 +218,11 @@
       sentences.push(`${turnTotals[0].team.displayName} held a ${turnMargin}-${marginUnit} lead at the turn.`);
     }
 
-    const narrativeTeams = teams.slice(0, 2).sort((left, right) => left.configuredOrder - right.configuredOrder);
-    narrativeTeams.forEach((team) => {
-      sentences.push(contributionSentence(team, turnIndex));
-    });
+    const biggestSwing = biggestMomentumSwing(teams[0], teams[1], scorecardMode);
+    sentences.push(biggestSwing || 'Neither side found a decisive one-hole swing, keeping the match finely balanced throughout.');
+
+    const comeback = comebackSentence(teams[0], teams[1], scorecardMode, turnIndex);
+    sentences.push(comeback || backNineSentence(teams[0], teams[1], scorecardMode, turnIndex));
 
     const first = teams[0];
     const second = teams[1];
@@ -226,7 +253,76 @@
     return sentences.slice(0, 5);
   }
 
-  function contributionSentence(team, startIndex) {
+  function biggestMomentumSwing(first, second, scorecardMode) {
+    let biggest = null;
+    const holeCount = Math.min(first.holeResults.length, second.holeResults.length);
+    for (let index = 0; index < holeCount; index += 1) {
+      const firstValue = first.holeResults[index]?.value;
+      const secondValue = second.holeResults[index]?.value;
+      if (typeof firstValue !== 'number' || typeof secondValue !== 'number' || firstValue === secondValue) continue;
+      const winner = compareScores(firstValue, secondValue, scorecardMode) < 0 ? first : second;
+      const loser = winner.id === first.id ? second : first;
+      const winnerValue = winner.id === first.id ? firstValue : secondValue;
+      const loserValue = winner.id === first.id ? secondValue : firstValue;
+      const swing = Math.abs(firstValue - secondValue);
+      if (!biggest || swing > biggest.swing) {
+        const beforeWinner = sumHoleValues(winner.holeResults.slice(0, index));
+        const beforeLoser = sumHoleValues(loser.holeResults.slice(0, index));
+        const afterWinner = beforeWinner + winnerValue;
+        const afterLoser = beforeLoser + loserValue;
+        biggest = { index, winner, loser, winnerValue, loserValue, swing, beforeWinner, beforeLoser, afterWinner, afterLoser };
+      }
+    }
+    if (!biggest) return null;
+
+    const winnerHole = biggest.winner.holeResults[biggest.index];
+    const contributorNames = biggest.winner.members
+      .filter((member) => (winnerHole.contributorIds || []).includes(member.id))
+      .map((member) => member.name);
+    const playerText = contributorNames.length ? `${joinNames(contributorNames)} delivered` : `${biggest.winner.displayName} produced`;
+    const unit = scorecardMode === 'stableford' ? 'point' : 'stroke';
+    const before = scorePosition(biggest.beforeWinner, biggest.beforeLoser, scorecardMode);
+    const after = scorePosition(biggest.afterWinner, biggest.afterLoser, scorecardMode);
+    return `${playerText} the biggest one-hole swing on ${holeLabel(winnerHole, biggest.index)}, a ${biggest.swing}-${unit} gain that took ${biggest.winner.displayName} from ${before} to ${after}.`;
+  }
+
+  function comebackSentence(first, second, scorecardMode, startIndex) {
+    const candidates = [first, second].flatMap((team) => {
+      const opponent = team.id === first.id ? second : first;
+      const contributor = leadingContributor(team, startIndex);
+      if (!contributor || contributor.stretch.length < 2) return [];
+      const start = contributor.stretch.startIndex;
+      const end = contributor.stretch.endIndex;
+      const beforeTeam = sumHoleValues(team.holeResults.slice(0, start));
+      const beforeOpponent = sumHoleValues(opponent.holeResults.slice(0, start));
+      const afterTeam = sumHoleValues(team.holeResults.slice(0, end + 1));
+      const afterOpponent = sumHoleValues(opponent.holeResults.slice(0, end + 1));
+      return [{ team, opponent, contributor, beforeTeam, beforeOpponent, afterTeam, afterOpponent }];
+    });
+    if (!candidates.length) return null;
+
+    candidates.sort((left, right) => right.contributor.stretch.length - left.contributor.stretch.length || right.contributor.count - left.contributor.count);
+    const chosen = candidates[0];
+    const before = scorePosition(chosen.beforeTeam, chosen.beforeOpponent, scorecardMode);
+    const after = scorePosition(chosen.afterTeam, chosen.afterOpponent, scorecardMode);
+    const stretch = chosen.contributor.stretch;
+    return `${chosen.contributor.member.name} then counted on ${stretch.length} straight holes from ${stretch.startHole}–${stretch.endHole}, driving ${chosen.team.displayName} from ${before} to ${after}.`;
+  }
+
+  function backNineSentence(first, second, scorecardMode, startIndex) {
+    const firstTotal = sumHoleValues(first.holeResults.slice(startIndex));
+    const secondTotal = sumHoleValues(second.holeResults.slice(startIndex));
+    if (firstTotal === secondTotal) {
+      return `The teams matched each other across the closing stretch, each adding ${firstTotal} ${scorecardMode === 'stableford' ? 'points' : 'strokes'}.`;
+    }
+    const stronger = compareScores(firstTotal, secondTotal, scorecardMode) < 0 ? first : second;
+    const weaker = stronger.id === first.id ? second : first;
+    const strongerTotal = stronger.id === first.id ? firstTotal : secondTotal;
+    const weakerTotal = stronger.id === first.id ? secondTotal : firstTotal;
+    return `${stronger.displayName} had the stronger closing stretch, ${strongerTotal}–${weakerTotal} against ${weaker.displayName}.`;
+  }
+
+  function leadingContributor(team, startIndex) {
     const backNine = team.holeResults.slice(startIndex);
     const counts = new Map();
     backNine.forEach((hole) => {
@@ -237,30 +333,43 @@
     const contributor = team.members
       .map((member) => ({ member, count: counts.get(member.id) || 0 }))
       .sort((left, right) => right.count - left.count || left.member.name.localeCompare(right.member.name))[0];
-    if (!contributor || contributor.count === 0) {
-      return `${team.displayName} combined for ${sumHoleValues(backNine)} on the back nine.`;
-    }
-    const stretch = longestContributionStretch(backNine, contributor.member.id);
-    const stretchText = stretch.length >= 2
-      ? `, including a ${stretch.length}-hole stretch from holes ${stretch.startHole}–${stretch.endHole}`
-      : '';
-    return `${contributor.member.name} supplied a counting score on ${contributor.count} back-nine holes for ${team.displayName}${stretchText}.`;
+    if (!contributor || contributor.count === 0) return null;
+    return {
+      ...contributor,
+      stretch: longestContributionStretch(team.holeResults, contributor.member.id, startIndex),
+    };
   }
 
-  function longestContributionStretch(holes, playerId) {
-    let best = { length: 0, startHole: null, endHole: null };
-    let current = { length: 0, startHole: null, endHole: null };
-    holes.forEach((hole) => {
-      if ((hole.contributorIds || []).includes(playerId)) {
-        if (current.length === 0) current.startHole = hole.holeNumber;
+  function longestContributionStretch(holes, playerId, startIndex = 0) {
+    let best = { length: 0, startHole: null, endHole: null, startIndex: null, endIndex: null };
+    let current = { length: 0, startHole: null, endHole: null, startIndex: null, endIndex: null };
+    holes.forEach((hole, index) => {
+      if (index >= startIndex && (hole.contributorIds || []).includes(playerId)) {
+        if (current.length === 0) {
+          current.startHole = hole.holeNumber;
+          current.startIndex = index;
+        }
         current.length += 1;
         current.endHole = hole.holeNumber;
+        current.endIndex = index;
         if (current.length > best.length) best = { ...current };
       } else {
-        current = { length: 0, startHole: null, endHole: null };
+        current = { length: 0, startHole: null, endHole: null, startIndex: null, endIndex: null };
       }
     });
     return best;
+  }
+
+  function scorePosition(teamScore, opponentScore, scorecardMode) {
+    const margin = scorecardMode === 'stableford' ? teamScore - opponentScore : opponentScore - teamScore;
+    if (margin === 0) return 'level';
+    const singular = scorecardMode === 'stableford' ? 'point' : 'stroke';
+    const unit = Math.abs(margin) === 1 ? singular : `${singular}s`;
+    return `${Math.abs(margin)} ${unit} ${margin > 0 ? 'ahead' : 'behind'}`;
+  }
+
+  function holeLabel(hole, index) {
+    return `hole ${hole?.holeNumber ?? index + 1}`;
   }
 
   function rankResults(entries, scorecardMode, nameKey) {
@@ -400,7 +509,7 @@
     return parsed !== null && parsed > 0 ? parsed : null;
   }
 
-  const api = { buildTeamResults, buildTeamSummary, strokeAdjustments, strokesReceived };
+  const api = { buildTeamResults, buildIndividualResults, buildTeamSummary, strokeAdjustments, strokesReceived };
   global.AutoStrikeTeamResults = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
