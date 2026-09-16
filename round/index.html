@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Shared AutoStrike Golf Round</title>
   <meta name="description" content="View a shared AutoStrike Golf scorecard and round summary.">
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
   <meta name="referrer" content="no-referrer">
   <link rel="stylesheet" href="/style.css">
-  <link rel="stylesheet" href="/round/round.css?v=playorder1">
+  <link rel="stylesheet" href="/round/round.css?v=downloadbar1">
   <link rel="icon" type="image/png" href="/logo-64.png">
   <link rel="apple-touch-icon" href="/logo-64.png">
 </head>
@@ -24,7 +24,19 @@
       <h1>Loading round...</h1>
     </section>
   </main>
+  <a class="round-download-fixed" href="https://apps.apple.com/us/app/autostrike-golf/id6762587973" onclick="return handleDownloadClick(event)">Download AutoStrike</a>
+  <div class="round-modal-overlay" id="round-download-modal" onclick="closeRoundModal(event)">
+    <div class="round-modal" role="dialog" aria-modal="true" aria-labelledby="round-download-title">
+      <button class="round-modal-close" type="button" aria-label="Close download popup" onclick="closeRoundModal()">&times;</button>
+      <h2 id="round-download-title">AutoStrike Golf</h2>
+      <p>Scan with your iPhone camera to open or install</p>
+      <div class="round-modal-qr"><img src="/app-store-qr.png" alt="QR Code for App Store"></div>
+      <a href="https://apps.apple.com/us/app/autostrike-golf/id6762587973" target="_blank" rel="noopener">
+        <img src="/app-store-badge.svg" alt="Download on the App Store" style="height:44px">
+      </a>
+    </div>
+  </div>
   <script src="/round/team-results.js?v=recap2"></script>
-  <script src="/round/round.js?v=storedsummary2"></script>
+  <script src="/round/round.js?v=downloadbar1"></script>
 </body>
 </html>

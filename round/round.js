@@ -40,7 +40,6 @@ function renderError(message) {
       <p class="round-muted">${escapeHtml(message)}</p>
       ${actionsMarkup()}
     </section>
-    ${downloadModalMarkup()}
   `;
 }
 
@@ -139,8 +138,6 @@ function renderRound(round) {
         ${metricMarkup('Double+', String(metrics.doubleBogeyOrWorseCount))}
       </div>
     </section>
-
-    ${downloadModalMarkup()}
   `;
   bindRoundInteractions();
 }
@@ -358,22 +355,6 @@ function actionsMarkup() {
   return `
     <div class="round-actions">
       <a class="round-button round-button-primary" href="${APP_STORE_URL}" onclick="return handleDownloadClick(event)">Download AutoStrike</a>
-    </div>
-  `;
-}
-
-function downloadModalMarkup() {
-  return `
-    <div class="round-modal-overlay" id="round-download-modal" onclick="closeRoundModal(event)">
-      <div class="round-modal" role="dialog" aria-modal="true" aria-labelledby="round-download-title">
-        <button class="round-modal-close" type="button" aria-label="Close download popup" onclick="closeRoundModal()">&times;</button>
-        <h2 id="round-download-title">AutoStrike Golf</h2>
-        <p>Scan with your iPhone camera to open or install</p>
-        <div class="round-modal-qr"><img src="/app-store-qr.png" alt="QR Code for App Store"></div>
-        <a href="${APP_STORE_URL}" target="_blank" rel="noopener">
-          <img src="/app-store-badge.svg" alt="Download on the App Store" style="height:44px">
-        </a>
-      </div>
     </div>
   `;
 }

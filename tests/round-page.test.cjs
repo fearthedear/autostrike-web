@@ -82,7 +82,8 @@ test('production workflow deploys the authenticated summary worker', async () =>
 });
 
 test('download popup sits outside filtered cards and iOS follows the App Store link', async () => {
-  const [source, css, qrCode] = await Promise.all([
+  const [html, source, css, qrCode] = await Promise.all([
+    readFile(new URL('../round/index.html', `file://${__filename}`), 'utf8'),
     readFile(new URL('../round/round.js', `file://${__filename}`), 'utf8'),
     readFile(new URL('../round/round.css', `file://${__filename}`), 'utf8'),
     readFile(new URL('../app-store-qr.png', `file://${__filename}`)),
@@ -90,16 +91,37 @@ test('download popup sits outside filtered cards and iOS follows the App Store l
   const renderStart = source.indexOf('root.innerHTML = `');
   const downloadCard = source.indexOf('round-download-card', renderStart);
   const individualStats = source.indexOf('round-individual-stats', renderStart);
-  const modal = source.indexOf('${downloadModalMarkup()}', individualStats);
+  const roundRoot = html.indexOf('id="round-root"');
+  const modal = html.indexOf('id="round-download-modal"');
 
   assert.ok(downloadCard > renderStart);
   assert.ok(individualStats > downloadCard);
-  assert.ok(modal > individualStats);
+  assert.ok(roundRoot > 0);
+  assert.ok(modal > roundRoot);
+  assert.doesNotMatch(source, /id="round-download-modal"/);
   assert.match(source, /iPhone\|iPad\|iPod/);
   assert.match(source, /navigator\.platform === 'MacIntel'/);
   assert.match(source, /return true; \/\/ follow the href to App Store/);
   assert.match(css, /max-height: calc\(100dvh - 32px\)/);
   assert.match(css, /body\.round-modal-open/);
-  assert.match(source, /src="\/app-store-qr\.png"/);
+  assert.match(html, /src="\/app-store-qr\.png"/);
   assert.ok(qrCode.length > 0);
+});
+
+test('round page keeps an always-visible download button on mobile and desktop', async () => {
+  const [html, css] = await Promise.all([
+    readFile(new URL('../round/index.html', `file://${__filename}`), 'utf8'),
+    readFile(new URL('../round/round.css', `file://${__filename}`), 'utf8'),
+  ]);
+  const roundRoot = html.indexOf('id="round-root"');
+  const fixedButton = html.indexOf('class="round-download-fixed"');
+
+  assert.ok(roundRoot > 0);
+  assert.ok(fixedButton > roundRoot);
+  assert.match(html, /class="round-download-fixed"[\s\S]*Download AutoStrike/);
+  assert.match(html, /round\.css\?v=downloadbar1/);
+  assert.match(html, /round\.js\?v=downloadbar1/);
+  assert.match(css, /\.round-download-fixed \{[\s\S]*position: fixed/);
+  assert.match(css, /@media \(max-width: 760px\) \{[\s\S]*\.round-download-fixed \{[\s\S]*bottom: 0/);
+  assert.match(css, /@media \(min-width: 761px\) \{[\s\S]*\.round-download-fixed \{[\s\S]*top: 24px/);
 });

@@ -534,10 +534,57 @@
   color: var(--text);
 }
 
+.round-download-fixed {
+  position: fixed;
+  z-index: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+  color: var(--green-deep);
+  font-weight: 850;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+}
+
+body.round-modal-open .round-download-fixed {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@media (min-width: 761px) {
+  .round-download-fixed {
+    top: 24px;
+    right: 24px;
+  }
+}
+
 @media (max-width: 760px) {
   .round-hero,
   .round-download-card {
     grid-template-columns: 1fr;
+  }
+
+  .round-actions {
+    display: none;
+  }
+
+  .round-shell {
+    padding-bottom: calc(clamp(24px, 5vw, 56px) + 5.25rem + env(safe-area-inset-bottom));
+  }
+
+  .round-download-fixed {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    min-height: 54px;
+    border-radius: 0;
+    padding: 14px 18px max(14px, env(safe-area-inset-bottom));
   }
 
   .round-score {
