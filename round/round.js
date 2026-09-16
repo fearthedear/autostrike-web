@@ -80,6 +80,7 @@ function renderRound(round) {
       scorecard.playerName,
       roundViewState.scorecardMode,
       roundViewState.basis,
+      scorecard.showPutts,
     )).join('')
     : '<p class="round-muted">Hole-by-hole details are unavailable for this round.</p>';
   const heroScoreMarkup = teamResults ? '' : `
@@ -368,7 +369,7 @@ function metricMarkup(label, value) {
   `;
 }
 
-function scorecardSectionMarkup(section, playerName, scorecardMode, basis) {
+function scorecardSectionMarkup(section, playerName, scorecardMode, basis, showPutts = false) {
   const showNet = basis === 'net';
   const showPoints = scorecardMode === 'stableford';
   return `
@@ -379,7 +380,7 @@ function scorecardSectionMarkup(section, playerName, scorecardMode, basis) {
       ${scorecardRowMarkup('Strokes', section.holes, scoreCellMarkup, sumText(section.holes, 'score'))}
       ${showNet ? scorecardRowMarkup('Net', section.holes, netScoreCellMarkup, sumText(section.holes, 'adjustedScore'), true) : ''}
       ${showPoints ? scorecardRowMarkup('Points', section.holes, pointsCellMarkup, sumText(section.holes, 'points')) : ''}
-      ${scorecardRowMarkup('Putts', section.holes, (hole) => escapeHtml(numberText(hole.putts)), sumText(section.holes, 'putts'), true)}
+      ${showPutts ? scorecardRowMarkup('Putts', section.holes, (hole) => escapeHtml(numberText(hole.putts)), sumText(section.holes, 'putts'), true) : ''}
     </div>
   `;
 }
@@ -444,6 +445,7 @@ function buildScorecard(round, playerId = null) {
     metrics: playerMetrics(holes),
     playerName: stringField(player, ['name']) || primaryPlayerName(round),
     playerId: stringField(player, ['id']),
+    showPutts: isRoundOwner(round, playerId),
   };
 }
 
@@ -465,6 +467,15 @@ function playerForRound(round, playerId) {
     null;
 }
 
+function isRoundOwner(round, playerId = null) {
+  const metadata = isRecord(round.metadata) ? round.metadata : {};
+  const primaryPlayerId = stringField(metadata, ['primary_player_id', 'primaryPlayerId']);
+  const selectedPlayerId = stringField(playerForRound(round, playerId), ['id']);
+  if (!selectedPlayerId) return true;
+  if (primaryPlayerId) return selectedPlayerId === primaryPlayerId;
+  return selectedPlayerId === stringField(playerForRound(round, null), ['id']);
+}
+
 function scorecardHoles(round, playerId = null) {
   const metadata = isRecord(round.metadata) ? round.metadata : {};
   const roundHoleSources = holeSourcesFrom(metadata.round_holes ?? metadata.roundHoles);
@@ -473,13 +484,15 @@ function scorecardHoles(round, playerId = null) {
   const primaryPlayerId = stringField(metadata, ['primary_player_id', 'primaryPlayerId']);
   const selectedPlayerId = stringField(player, ['id']);
   const useRoundFallback = !selectedPlayerId || selectedPlayerId === primaryPlayerId;
+  const showPutts = isRoundOwner(round, playerId);
   const scoreByHole = intMapFrom(
     player?.score_by_hole ?? player?.scoreByHole ??
     (useRoundFallback ? metadata.score_by_hole ?? metadata.scoreByHole : null),
   );
   const puttsByHole = intMapFrom(
-    player?.putts_by_hole ?? player?.puttsByHole ??
-    (useRoundFallback ? metadata.putts_by_hole ?? metadata.puttsByHole : null),
+    showPutts
+      ? player?.putts_by_hole ?? player?.puttsByHole ?? metadata.putts_by_hole ?? metadata.puttsByHole
+      : null,
   );
   const breakdownById = new Map();
   const breakdownByHoleNumber = new Map();
@@ -508,7 +521,9 @@ function scorecardHoles(round, playerId = null) {
       const courseHole = courseHoleByNumber.get(holeNumber);
       const par = intField(record, ['par']) ?? intField(breakdown, ['par']) ?? 4;
       const score = scoreByHole[id] ?? intField(breakdown, ['score', 'strokes', 'gross_score', 'grossScore']) ?? null;
-      const putts = puttsByHole[id] ?? intField(breakdown, ['putts', 'putt_count', 'puttCount']) ?? null;
+      const putts = showPutts
+        ? puttsByHole[id] ?? intField(breakdown, ['putts', 'putt_count', 'puttCount']) ?? null
+        : null;
       const nineName =
         stringField(record, ['nine_name', 'nineName']) ??
         stringField(breakdown, ['nine_name', 'nineName']) ??

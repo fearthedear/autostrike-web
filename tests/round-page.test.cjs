@@ -108,6 +108,15 @@ test('download popup sits outside filtered cards and iOS follows the App Store l
   assert.ok(qrCode.length > 0);
 });
 
+test('scorecards show putts only for the round owner', async () => {
+  const source = await readFile(new URL('../round/round.js', `file://${__filename}`), 'utf8');
+  assert.match(source, /function isRoundOwner\(/);
+  assert.match(source, /showPutts: isRoundOwner\(round, playerId\)/);
+  assert.match(source, /showPutts \? scorecardRowMarkup\('Putts'/);
+  assert.match(source, /showPutts\s*\?\s*puttsByHole\[id\] \?\? intField\(breakdown/);
+  assert.match(source, /showPutts\s*\?\s*[\s\S]*: null/);
+});
+
 test('round page keeps an always-visible download button on mobile and desktop', async () => {
   const [html, css] = await Promise.all([
     readFile(new URL('../round/index.html', `file://${__filename}`), 'utf8'),
@@ -119,8 +128,8 @@ test('round page keeps an always-visible download button on mobile and desktop',
   assert.ok(roundRoot > 0);
   assert.ok(fixedButton > roundRoot);
   assert.match(html, /class="round-download-fixed"[\s\S]*Download AutoStrike/);
-  assert.match(html, /round\.css\?v=downloadbar1/);
-  assert.match(html, /round\.js\?v=downloadbar1/);
+  assert.match(html, /round\.css\?v=ownerputts1/);
+  assert.match(html, /round\.js\?v=ownerputts1/);
   assert.match(css, /\.round-download-fixed \{[\s\S]*position: fixed/);
   assert.match(css, /@media \(max-width: 760px\) \{[\s\S]*\.round-download-fixed \{[\s\S]*bottom: 0/);
   assert.match(css, /@media \(min-width: 761px\) \{[\s\S]*\.round-download-fixed \{[\s\S]*top: 24px/);
