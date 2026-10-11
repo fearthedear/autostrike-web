@@ -346,7 +346,7 @@ function ordinal(value) {
 function logoMarkup() {
   return `
     <a class="round-logo" href="/">
-      <img src="/logo.webp" alt="AutoStrike Golf">
+      <img src="/logo.webp?v=20261011" alt="AutoStrike Golf">
       <span>AutoStrike <strong>Golf</strong></span>
     </a>
   `;
