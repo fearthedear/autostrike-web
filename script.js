@@ -111,6 +111,71 @@ const obs = new IntersectionObserver((entries) => {
 }, { threshold: 0.15 });
 document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
 
+// ── Price comparison bars (animate only when JS runs) ──
+document.querySelectorAll('.price-bars').forEach(el => {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  el.classList.add('animate');
+  obs.observe(el);
+});
+
+// ── Hero promo video ──
+// The poster <picture> is the LCP element; the video is fetched only after
+// window load so it never competes with it.
+(function() {
+  const video = document.getElementById('hero-video');
+  if (!video) return;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const portraitMq = window.matchMedia('(max-width: 768px)');
+  const saveData = navigator.connection && navigator.connection.saveData;
+  if (reduceMotion.matches || saveData) return;
+
+  let current = '';
+  let inView = true;
+
+  function setSources() {
+    const base = portraitMq.matches ? video.dataset.portrait : video.dataset.landscape;
+    if (!base || base === current) return;
+    current = base;
+    video.classList.remove('is-playing');
+    video.innerHTML = `<source src="${base}.webm" type="video/webm"><source src="${base}.mp4" type="video/mp4">`;
+    video.load();
+    tryPlay();
+  }
+
+  function tryPlay() {
+    if (!inView || !current) return;
+    const p = video.play();
+    if (p && p.catch) p.catch(() => {});
+  }
+
+  video.addEventListener('playing', () => video.classList.add('is-playing'));
+
+  new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      inView = e.isIntersecting;
+      if (inView) tryPlay(); else video.pause();
+    });
+  }, { threshold: 0.2 }).observe(video);
+
+  if (portraitMq.addEventListener) portraitMq.addEventListener('change', setSources);
+
+  function start() { setTimeout(setSources, 200); }
+  if (document.readyState === 'complete') start();
+  else window.addEventListener('load', start, { once: true });
+})();
+
+// ── Screenshot gallery arrows ──
+(function() {
+  const track = document.getElementById('gallery-track');
+  if (!track) return;
+  document.querySelectorAll('.gallery-nav button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dir = Number(btn.dataset.dir) || 1;
+      track.scrollBy({ left: dir * track.clientWidth * 0.8, behavior: 'smooth' });
+    });
+  });
+})();
+
 // ── Mobile menu ──
 const hamburger = document.querySelector('.hamburger');
 const navLinks = document.querySelector('.nav-links');
