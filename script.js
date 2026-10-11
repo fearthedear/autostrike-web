@@ -136,8 +136,9 @@ document.querySelectorAll('.price-bars').forEach(el => {
     const base = portraitMq.matches ? video.dataset.portrait : video.dataset.landscape;
     if (!base || base === current) return;
     current = base;
+    const v = video.dataset.version ? `?v=${video.dataset.version}` : '';
     video.classList.remove('is-playing');
-    video.innerHTML = `<source src="${base}.webm" type="video/webm"><source src="${base}.mp4" type="video/mp4">`;
+    video.innerHTML = `<source src="${base}.webm${v}" type="video/webm"><source src="${base}.mp4${v}" type="video/mp4">`;
     video.load();
     tryPlay();
   }
