@@ -3,24 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AutoStrike Golf — Auto Shot Tracking & GPS Golf Companion</title>
-  <meta name="description" content="AutoStrike Golf — automatic shot tracking, real-time GPS distances, and live scoring for golf courses worldwide.">
+  <title>AutoStrike Golf — Stop overpaying. Start playing.</title>
+  <meta name="description" content="Still paying $99.99 a year for a golf app? AutoStrike Golf gives you auto shot tracking, GPS yardages, an Apple Watch app, live multiplayer, handicap and stats for $24.99 a year. Free to download.">
   <link rel="stylesheet" href="style.css?v=polish">
+  <link rel="stylesheet" href="home.css?v=20261012">
+  <link rel="preload" as="image" href="media/promo-landscape-poster.jpg" media="(min-width: 769px)" fetchpriority="high">
+  <link rel="preload" as="image" href="media/promo-portrait-poster.jpg" media="(max-width: 768px)" fetchpriority="high">
   <link rel="icon" type="image/png" href="logo-64.png?v=20261011">
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=20261011">
   <link rel="canonical" href="https://autostrikegolf.com/">
   <link rel="sitemap" type="application/xml" href="/sitemap.xml">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="AutoStrike Golf — Auto Shot Tracking & GPS Golf Companion">
-  <meta property="og:description" content="Automatic shot tracking, real-time GPS distances, and live scoring for golf courses worldwide.">
+  <meta property="og:title" content="AutoStrike Golf — Stop overpaying. Start playing.">
+  <meta property="og:description" content="Everything you need in a golf app. For less. Auto shot tracking, GPS, Apple Watch, live multiplayer and stats for $24.99 a year. Save up to $75 a year.">
   <meta property="og:url" content="https://autostrikegolf.com/">
-  <meta property="og:image" content="https://autostrikegolf.com/og-share-v5.jpg">
-  <meta property="og:image:width" content="1528">
-  <meta property="og:image:height" content="1029">
+  <meta property="og:image" content="https://autostrikegolf.com/og-share-v6.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Why pay up to 4x more? Leading golf apps cost $69.99 to $99.99 a year. AutoStrike Pro is $24.99.">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://autostrikegolf.com/og-share-v5.jpg">
-  <meta name="twitter:title" content="AutoStrike Golf — Auto Shot Tracking & GPS Golf Companion">
-  <meta name="twitter:description" content="Automatic shot tracking, real-time GPS distances, and live scoring for golf courses worldwide.">
+  <meta name="twitter:image" content="https://autostrikegolf.com/og-share-v6.jpg">
+  <meta name="twitter:title" content="AutoStrike Golf — Stop overpaying. Start playing.">
+  <meta name="twitter:description" content="Everything you need in a golf app. For less. Auto shot tracking, GPS, Apple Watch, live multiplayer and stats for $24.99 a year.">
   <meta name="robots" content="index, follow">
   <script type="application/ld+json">
   {
@@ -29,7 +33,7 @@
     "name": "AutoStrike Golf",
     "operatingSystem": "iOS",
     "applicationCategory": "SportsApplication",
-    "description": "Real-time GPS distances, handicap tracking on World Handicap System rules, and multiplayer scoring for golf courses worldwide.",
+    "description": "Everything you need in a golf app, for less: automatic shot tracking with Apple Watch, GPS yardages with plays-like elevation, live multiplayer, handicap tracking, stats and AI scorecard import. Free to download; AutoStrike Pro is $24.99 a year.",
     "url": "https://autostrikegolf.com",
     "downloadUrl": "https://apps.apple.com/us/app/autostrike-golf/id6762587973",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -38,7 +42,7 @@
   </script>
   <style>nav { top: 51px !important; }</style>
 </head>
-<body>
+<body class="home">
 
 <div class="promo-banner" id="promo-banner">
   <div class="promo-banner-inner">
@@ -53,99 +57,134 @@
   <div class="nav-inner">
     <a href="#" class="logo"><img src="logo.webp?v=20261011" alt="AutoStrike" class="logo-img"><span class="logo-text">AutoStrike <span class="gold">Golf</span></span></a>
     <ul class="nav-links">
+      <li><a href="#compare">Compare</a></li>
       <li><a href="#features">Features</a></li>
+      <li><a href="#switch">Import</a></li>
       <li><a href="#courses">Courses</a></li>
-      <li><a href="#handicap">Handicap</a></li>
       <li><a href="#pricing">Pricing</a></li>
-      <li><a href="#download">Download</a></li>
       <li><a href="/support.html">Support</a></li>
+      <li><a href="#download" class="nav-cta" onclick="openDownloadModal(event)">Download</a></li>
     </ul>
     <button class="hamburger" aria-label="Menu">☰</button>
   </div>
 </nav>
 
 <section class="hero">
-  <div class="hero-content fade-in">
+  <div class="hero-content">
     <div class="hero-split">
       <div class="hero-left">
-        <h2 class="hero-promise">Golf apps shouldn't need instructions</h2>
-        <h1><span class="gold">AutoStrike</span> Golf</h1>
-        <ul class="hero-features">
-          <li><span class="feat-full">⚡ Automatic shot tracking from your Apple Watch</span><span class="feat-short">⚡ Auto shot tracking via Apple Watch</span></li>
-          <li><span class="feat-full">📍 Real-time GPS distances to greens, hazards & doglegs</span><span class="feat-short">📍 GPS distances to greens & hazards</span></li>
-          <li><span class="feat-full">👥 Live multiplayer scoring with friends via join codes</span><span class="feat-short">👥 Multiplayer scoring with friends</span></li>
-          <li><span class="feat-full">📊 Handicap index calculated on World Handicap System rules</span><span class="feat-short">📊 WHS handicap calculation</span></li>
-          <li><span class="feat-full">🏌️ Works on any of 28,000+ courses worldwide</span><span class="feat-short">🏌️ 28,000+ courses worldwide</span></li>
-        </ul>
-        <div class="award-badge">
-          <div class="award-text">
-            <span class="award-title">Best New Golf App 2026</span>
-            <span class="award-stars">★★★★★</span>
+        <p class="hero-hook">Still paying <strong>$99.99 a year</strong> for a golf app?</p>
+        <h1><span>Stop overpaying.</span><span class="lime">Start playing.</span></h1>
+        <p class="hero-sub">Everything you need in a golf app. For less. Auto shot tracking on Apple Watch, GPS yardages, live multiplayer and stats, all for <strong>$24.99 a year</strong>. Save up to $75 a year compared with leading golf apps.</p>
+        <a class="cta-btn" href="#" onclick="openDownloadModal(event)">Download free on the App Store</a>
+        <p class="hero-fine">Free to download · 3 free rounds · then Pro for <strong>$24.99/yr</strong></p>
+        <div class="hero-proof">
+          <div class="award-badge">
+            <div class="award-text">
+              <span class="award-title">Best New Golf App 2026</span>
+              <span class="award-stars">★★★★★</span>
+            </div>
           </div>
+          <p class="rounds-counter"><span id="rounds-count"></span> rounds played</p>
         </div>
-        <a class="cta-btn" href="#" onclick="openDownloadModal(event)">Download on the App Store</a>
-        <p class="rounds-counter"><span id="rounds-count"></span> rounds played</p>
       </div>
       <div class="hero-right">
-        <div class="device-row">
-          <div class="device-phone">
-            <img src="phone-mockup.webp" alt="AutoStrike Golf on iPhone">
-          </div>
-          <div class="device-watch">
-            <img src="watch-mockup.webp" alt="AutoStrike Golf on Apple Watch">
-          </div>
+        <div class="hero-video-frame">
+          <picture>
+            <source media="(max-width: 768px)" srcset="media/promo-portrait-poster.jpg" width="720" height="1280">
+            <img src="media/promo-landscape-poster.jpg" width="1280" height="720" alt="Still paying $99.99 a year for a golf app? AutoStrike Pro is $24.99 a year." fetchpriority="high" decoding="async">
+          </picture>
+          <video id="hero-video" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"
+                 data-landscape="media/promo-landscape" data-portrait="media/promo-portrait"></video>
         </div>
       </div>
     </div>
   </div>
 </section>
 
+<section class="compare" id="compare">
+  <div class="section-inner compare-grid">
+    <div class="compare-copy">
+      <p class="section-label fade-in">Yearly subscription</p>
+      <h2 class="section-title fade-in">Why pay up to <span class="lime">4x more?</span></h2>
+      <p class="section-sub fade-in">The leading golf GPS apps charge $69.99 to $99.99 a year for premium. AutoStrike Pro gives you the essentials for $24.99.</p>
+      <p class="fade-in"><span class="save-pill">Save up to $75 a year</span></p>
+    </div>
+    <div class="compare-chart fade-in">
+      <ul class="price-bars" aria-label="Yearly premium subscription prices">
+        <li><span class="bar-label">Leading golf app A</span><span class="bar-track"><span class="bar" style="--w:100%"></span></span><span class="bar-price">$99.99</span></li>
+        <li><span class="bar-label">Leading golf app B</span><span class="bar-track"><span class="bar" style="--w:100%"></span></span><span class="bar-price">$99.99</span></li>
+        <li><span class="bar-label">Leading golf app C</span><span class="bar-track"><span class="bar" style="--w:80%"></span></span><span class="bar-price">$79.99</span></li>
+        <li><span class="bar-label">Leading golf app D</span><span class="bar-track"><span class="bar" style="--w:70%"></span></span><span class="bar-price">$69.99</span></li>
+        <li class="us"><span class="bar-label">AutoStrike Pro</span><span class="bar-track"><span class="bar" style="--w:25%"></span></span><span class="bar-price">$24.99</span></li>
+      </ul>
+      <p class="footnote">Yearly premium subscription prices of leading golf GPS apps, US App Store, Oct 2026.</p>
+    </div>
+  </div>
+</section>
+
 <section class="features" id="features">
   <div class="section-inner">
-    <p class="section-label fade-in">Features</p>
-    <h2 class="section-title fade-in">Everything you need on the course</h2>
-    <p class="section-sub fade-in">GPS precision meets beautiful design. Built for golfers who want an edge.</p>
-    <div class="feature-grid">
-      <div class="feature-card featured fade-in">
-        <span class="feature-icon">⚡</span>
-        <h3>Auto Shot Tracking</h3>
-        <p>Automatically detects and records every shot using GPS — no tapping required. Just play your game and let AutoStrike do the rest.</p>
-      </div>
-      <div class="feature-card fade-in">
-        <span class="feature-icon">📡</span>
-        <h3>Live GPS Distances</h3>
-        <p>Real-time distances to front, center, and back of green — plus bunkers, water, and doglegs.</p>
-      </div>
-      <div class="feature-card fade-in">
-        <span class="feature-icon">🗺️</span>
-        <h3>Aerial Maps</h3>
-        <p>Satellite view of every hole with a draggable distance circle for precise targeting.</p>
-      </div>
-      <div class="feature-card fade-in">
-        <span class="feature-icon">👥</span>
-        <h3>Play With Friends</h3>
-        <p>Real-time multiplayer scoring via join codes with live leaderboards during your round.</p>
-      </div>
-      <div class="feature-card fade-in">
-        <span class="feature-icon">📊</span>
-        <h3>Handicap Tracking</h3>
-        <p>Handicap calculation on World Handicap System rules from your recorded rounds.</p>
-      </div>
-      <div class="feature-card fade-in">
-        <span class="feature-icon">✏️</span>
-        <h3>Score Recording</h3>
-        <p>Quick in-round score entry with stroke-by-stroke tracking and stats.</p>
-      </div>
-      <div class="feature-card fade-in">
-        <span class="feature-icon">🏌️</span>
-        <h3>Bag Management</h3>
-        <p>Track your clubs and average distances for smarter club selection.</p>
-      </div>
-      <div class="feature-card fade-in">
-        <span class="feature-icon">📈</span>
-        <h3>Round History</h3>
-        <p>Full history with stats, score differentials, and performance trends over time.</p>
-      </div>
+    <p class="section-label fade-in">Everything you need</p>
+    <h2 class="section-title fade-in">Everything you need. <span class="lime">For less.</span></h2>
+    <p class="section-sub fade-in">The tools golfers pay premium prices for, in one app built for iPhone and Apple Watch.</p>
+    <div class="check-grid">
+      <div class="check-item fade-in"><h3>GPS yardages</h3><p>Front, center and back of the green, plus hazards, layups and doglegs on satellite maps.</p></div>
+      <div class="check-item fade-in"><h3>Auto shot tracking</h3><p>Every shot recorded from your Apple Watch. No tags, no sensors. Just swing.</p></div>
+      <div class="check-item fade-in"><h3>Apple Watch app</h3><p>Distances, club suggestions and scoring on your wrist, so your phone stays in the bag.</p></div>
+      <div class="check-item fade-in"><h3>Plays-like elevation</h3><p>Yardages adjusted for elevation, so you know how far each shot really plays.</p></div>
+      <div class="check-item fade-in"><h3>Live multiplayer</h3><p>Play with friends using join codes and follow live leaderboards during the round.</p></div>
+      <div class="check-item fade-in"><h3>Handicap tracking</h3><p>Handicap index calculated on World Handicap System rules from your rounds.</p></div>
+      <div class="check-item fade-in"><h3>Stats &amp; trends</h3><p>Scoring, greens in regulation and putting trends that show where you're improving.</p></div>
+      <div class="check-item fade-in"><h3>AI scorecard import</h3><p>Bring your old scores from scorecard photos or screenshots. AI adds them to your history.</p></div>
+    </div>
+    <div class="check-cta fade-in">
+      <span class="save-pill">All for $24.99 a year</span>
+      <p>Free to download · 3 free rounds · then AutoStrike Pro</p>
+    </div>
+  </div>
+</section>
+
+<section class="gallery" id="gallery" aria-label="App screenshots">
+  <div class="section-inner gallery-head">
+    <div>
+      <p class="section-label fade-in">On the course</p>
+      <h2 class="section-title fade-in">Play your game. <span class="lime">We'll track it.</span></h2>
+      <p class="section-sub fade-in">Real screens from AutoStrike on iPhone and Apple Watch.</p>
+    </div>
+    <div class="gallery-nav">
+      <button type="button" data-dir="-1" aria-label="Previous screenshots">←</button>
+      <button type="button" data-dir="1" aria-label="Next screenshots">→</button>
+    </div>
+  </div>
+  <div class="gallery-track" id="gallery-track" tabindex="0">
+    <figure><img src="media/shots/01-golf-for-less-360.webp" srcset="media/shots/01-golf-for-less-360.webp 360w, media/shots/01-golf-for-less-600.webp 600w" sizes="(max-width: 768px) 64vw, 276px" width="600" height="1304" loading="lazy" decoding="async" alt="Everything you need in a golf app. For less. AutoStrike on iPhone and Apple Watch."></figure>
+    <figure><img src="media/shots/02-automatic-tracking-360.webp" srcset="media/shots/02-automatic-tracking-360.webp 360w, media/shots/02-automatic-tracking-600.webp 600w" sizes="(max-width: 768px) 64vw, 276px" width="600" height="1304" loading="lazy" decoding="async" alt="Your swing, automatically tracked with Apple Watch."></figure>
+    <figure><img src="media/shots/03-score-imports-360.webp" srcset="media/shots/03-score-imports-360.webp 360w, media/shots/03-score-imports-600.webp 600w" sizes="(max-width: 768px) 64vw, 276px" width="600" height="1304" loading="lazy" decoding="async" alt="Bring your scores from any golf app with AI import."></figure>
+    <figure><img src="media/shots/04-apple-watch-360.webp" srcset="media/shots/04-apple-watch-360.webp 360w, media/shots/04-apple-watch-600.webp 600w" sizes="(max-width: 768px) 64vw, 276px" width="600" height="1304" loading="lazy" decoding="async" alt="Play with your hands free on Apple Watch."></figure>
+    <figure><img src="media/shots/05-gps-yardages-360.webp" srcset="media/shots/05-gps-yardages-360.webp 360w, media/shots/05-gps-yardages-600.webp 600w" sizes="(max-width: 768px) 64vw, 276px" width="600" height="1304" loading="lazy" decoding="async" alt="Know your next shot with GPS yardages and elevation."></figure>
+    <figure><img src="media/shots/06-next-shot-guidance-360.webp" srcset="media/shots/06-next-shot-guidance-360.webp 360w, media/shots/06-next-shot-guidance-600.webp 600w" sizes="(max-width: 768px) 64vw, 276px" width="600" height="1304" loading="lazy" decoding="async" alt="Club suggestions tailored to your bag."></figure>
+    <figure><img src="media/shots/07-progress-360.webp" srcset="media/shots/07-progress-360.webp 360w, media/shots/07-progress-600.webp 600w" sizes="(max-width: 768px) 64vw, 276px" width="600" height="1304" loading="lazy" decoding="async" alt="See your game improve with scoring, greens and putting trends."></figure>
+    <figure><img src="media/shots/08-rounds-360.webp" srcset="media/shots/08-rounds-360.webp 360w, media/shots/08-rounds-600.webp 600w" sizes="(max-width: 768px) 64vw, 276px" width="600" height="1304" loading="lazy" decoding="async" alt="Play with friends and share your round summary."></figure>
+  </div>
+</section>
+
+<section class="switch" id="switch">
+  <div class="section-inner switch-grid">
+    <div>
+      <p class="section-label fade-in">Switching is easy</p>
+      <h2 class="section-title fade-in">Bring your <span class="lime">history.</span></h2>
+      <p class="section-sub fade-in">Import from any golf app. AI does the rest.</p>
+      <div class="switch-tags fade-in"><span>Scorecard photos</span><span>Screenshots from any golf app</span></div>
+      <ol class="switch-steps fade-in">
+        <li><div><h3>Snap or screenshot</h3><p>Photograph paper scorecards or take screenshots of past rounds in your old golf app.</p></div></li>
+        <li><div><h3>Upload in AutoStrike</h3><p>Select the images from your gallery in Import Scores.</p></div></li>
+        <li><div><h3>AI adds your scores</h3><p>Courses and scores land in your round history. We'll email you when the import is done.</p></div></li>
+      </ol>
+      <a class="cta-btn fade-in" href="#" onclick="openDownloadModal(event)">Switch to AutoStrike</a>
+    </div>
+    <div class="switch-visual fade-in">
+      <img src="media/shots/03-score-imports-600.webp" width="600" height="1304" loading="lazy" decoding="async" alt="Import Scores screen in AutoStrike: upload scorecard photos or screenshots from another golf app.">
     </div>
   </div>
 </section>
@@ -220,17 +259,18 @@
 <section class="pricing" id="pricing">
   <div class="section-inner">
     <p class="section-label fade-in">Pricing</p>
-    <h2 class="section-title fade-in">Automatic shot tracking for less than a sleeve of balls</h2>
-    <p class="section-sub fade-in">No ads. No gimmicks. Just the tools you need on the course.</p>
+    <h2 class="section-title fade-in">AutoStrike Pro. <span class="lime" style="white-space:nowrap">$24.99 a year.</span></h2>
+    <p class="section-sub fade-in" style="margin-left:auto;margin-right:auto;">Free to download. Play 3 rounds free, then go Pro. No ads. No gimmicks.</p>
     <div class="price-cards">
       <div class="price-card fade-in">
-        <h3>Free Trial</h3>
+        <h3>Free</h3>
         <div class="price"><span class="amount">Free</span></div>
+        <p class="price-monthly">Free to download</p>
         <ul>
-          <li>All GPS features</li>
+          <li>3 free rounds</li>
+          <li>GPS yardages</li>
           <li>Auto shot tracking</li>
           <li>Multiplayer scoring</li>
-          <li>Handicap tracking</li>
           <li>All courses included</li>
         </ul>
         <a class="cta-btn price-btn" href="#" onclick="openDownloadModal(event)">Download</a>
@@ -238,8 +278,9 @@
       <div class="price-card fade-in">
         <h3>Monthly</h3>
         <div class="price"><span class="currency">$</span><span class="amount">2.99</span><span class="period">/mo</span></div>
+        <p class="price-monthly">Billed monthly</p>
         <ul>
-          <li>All GPS features</li>
+          <li>Everything in Pro</li>
           <li>Auto shot tracking</li>
           <li>Multiplayer scoring</li>
           <li>Handicap tracking</li>
@@ -253,8 +294,9 @@
         <div class="price"><span class="currency">$</span><span class="amount">24.99</span><span class="period">/yr</span></div>
         <p class="price-monthly">Just $2.08/month</p>
         <ul>
-          <li>Everything in Monthly</li>
+          <li>Everything in Pro</li>
           <li>Best value</li>
+          <li>Save up to $75 a year vs leading golf apps</li>
           <li>Priority new features</li>
           <li>All courses included</li>
         </ul>
@@ -266,10 +308,10 @@
 
 <section class="cta" id="download">
   <div class="section-inner">
-    <p class="section-label fade-in">Get Started</p>
-    <h2 class="section-title fade-in">Ready to level up your game?</h2>
-    <p class="section-sub fade-in" style="margin-left:auto;margin-right:auto;">Download AutoStrike Golf and start tracking your next round.</p>
-    <a class="cta-btn fade-in" href="#" onclick="openDownloadModal(event)">Download on the App Store</a>
+    <img class="cta-icon fade-in" src="logo.webp?v=20261011" width="84" height="84" alt="" loading="lazy" decoding="async">
+    <h2 class="section-title fade-in">Stop overpaying. <span class="lime">Start playing.</span></h2>
+    <p class="section-sub fade-in" style="margin-left:auto;margin-right:auto;">AutoStrike Golf. Pro just $24.99 a year · Free to download · 3 free rounds.</p>
+    <a class="cta-btn fade-in" href="#" onclick="openDownloadModal(event)">Download free on the App Store</a>
   </div>
 </section>
 
@@ -297,6 +339,6 @@
   </div>
 </div>
 
-<script src="script.js"></script>
+<script src="script.js?v=20261012"></script>
 </body>
 </html>
