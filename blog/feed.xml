@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+  <title>AutoStrike Golf Blog</title>
+  <link>https://autostrikegolf.com/blog/</link>
+  <atom:link href="https://autostrikegolf.com/blog/feed.xml" rel="self" type="application/rss+xml"/>
+  <description>Honest, sourced golf app guides from AutoStrike Golf.</description>
+  <language>en-us</language>
+  <lastBuildDate>Wed, 28 Oct 2026 00:00:00 +0000</lastBuildDate>
+  <item>
+    <title>Golf app prices compared (2026): AutoStrike vs 18Birdies, Golfshot, Hole19 and SwingU</title>
+    <link>https://autostrikegolf.com/blog/golf-app-prices-compared/</link>
+    <guid isPermaLink="true">https://autostrikegolf.com/blog/golf-app-prices-compared/</guid>
+    <pubDate>Wed, 28 Oct 2026 00:00:00 +0000</pubDate>
+    <description>What 18Birdies, Golfshot, Hole19 and SwingU charge per year in 2026, what the paid tiers add, and how AutoStrike Pro compares at $24.99 a year.</description>
+  </item>
+  <item>
+    <title>Best Apple Watch golf app for automatic shot tracking, without sensors (2026)</title>
+    <link>https://autostrikegolf.com/blog/best-apple-watch-golf-app-auto-shot-tracking/</link>
+    <guid isPermaLink="true">https://autostrikegolf.com/blog/best-apple-watch-golf-app-auto-shot-tracking/</guid>
+    <pubDate>Wed, 28 Oct 2026 00:00:00 +0000</pubDate>
+    <description>Automatic shot tracking compared: AutoStrike, Golfshot, 18Birdies, Hole19, Arccos and Garmin. What needs sensors or a golf watch, and the real 3-year cost.</description>
+  </item>
+  <item>
+    <title>How to switch golf apps without losing your score history</title>
+    <link>https://autostrikegolf.com/blog/switch-golf-apps-keep-your-score-history/</link>
+    <guid isPermaLink="true">https://autostrikegolf.com/blog/switch-golf-apps-keep-your-score-history/</guid>
+    <pubDate>Wed, 28 Oct 2026 00:00:00 +0000</pubDate>
+    <description>Leaving 18Birdies, Golfshot, Hole19 or SwingU? What each app lets you export, how to import past scores from screenshots, and what happens to your handicap.</description>
+  </item>
+</channel>
+</rss>
