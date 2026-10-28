@@ -253,6 +253,9 @@ runQuery();   // shows the default empty hint, no list
 // ── Download modal ──
 function openDownloadModal(event, showPremium) {
   if (event) event.preventDefault();
+  if (window.trackAutoStrikeAdsEvent) {
+    window.trackAutoStrikeAdsEvent(showPremium ? 'premium_claim_started' : 'download_app_clicked');
+  }
   // On iOS, regular download clicks can go straight to the App Store.
   // Premium claim clicks must still show the email form first.
   if (/iPhone|iPad|iPod/.test(navigator.userAgent) && !showPremium) {
@@ -274,6 +277,7 @@ document.addEventListener('keydown', function(e) {
 // ── Premium claim ──
 async function submitPremiumClaim(event) {
   event.preventDefault();
+  if (window.trackAutoStrikeAdsEvent) window.trackAutoStrikeAdsEvent('premium_claim_submitted');
   const emailInput = document.getElementById('premium-email');
   const statusEl = document.getElementById('premium-status');
   const submitBtn = document.getElementById('premium-submit');
@@ -293,6 +297,7 @@ async function submitPremiumClaim(event) {
     });
     const data = await res.json();
     if (res.ok && data.success) {
+      if (window.oaiq) window.oaiq('measure', 'lead_created', { type: 'customer_action' });
       statusEl.textContent = '✓ Claimed! Check your email for premium access details.';
       statusEl.className = 'modal-note success';
       emailInput.value = '';
