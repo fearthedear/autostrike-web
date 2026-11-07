@@ -131,12 +131,13 @@ async function refreshFriendScores(round, supabaseUrl, supabaseKey) {
   if (!UUID_PATTERN.test(primaryId || '')) return;
   const holeIds = new Set((Array.isArray(meta.round_holes) ? meta.round_holes : []).map(hole => hole?.id).filter(Boolean));
   if (!holeIds.size) return;
-  const ids = meta.players.map(player => player?.id).filter(id => UUID_PATTERN.test(id || ''));
+  const assignments = meta.team_settings?.assignments_by_participant_id ?? meta.teamSettings?.assignmentsByParticipantId ?? {};
+  const ids = [...new Set([...meta.players.map(player => player?.id), ...Object.keys(assignments)].filter(id => UUID_PATTERN.test(id || '')))];
   if (ids.length < 2) return;
   const headers = { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, Accept: 'application/json' };
   try {
     const participantsUrl = new URL(`${supabaseUrl}/rest/v1/friend_game_participants`);
-    participantsUrl.searchParams.set('select', 'id,user_id,is_host,score_by_hole,completed_hole_ids,updated_at,left_at');
+    participantsUrl.searchParams.set('select', 'id,user_id,player_name,is_host,score_by_hole,completed_hole_ids,updated_at,left_at');
     participantsUrl.searchParams.set('game_id', `eq.${gameId}`);
     participantsUrl.searchParams.set('id', `in.(${ids.join(',')})`);
     const response = await fetch(participantsUrl.toString(), { headers });
@@ -165,6 +166,21 @@ async function refreshFriendScores(round, supabaseUrl, supabaseKey) {
       && (s.metadata?.primary_player_id ?? s.metadata?.primaryPlayerID) === host.id
       && s.metadata?.is_incomplete !== true && s.metadata?.isIncomplete !== true);
     let changed = false;
+    // Recover missing named game participants only when explicitly assigned to
+    // this scorecard's team and confirmed by their own completed scorecard.
+    for (const p of participants) {
+      if (!assignments[p.id] || !p.user_id || meta.players.some(player => player.id === p.id)) continue;
+      const own = completed.find(s => s.user_id === p.user_id
+        && (s.metadata?.primary_player_id ?? s.metadata?.primaryPlayerID) === p.id
+        && s.metadata?.is_incomplete !== true && s.metadata?.isIncomplete !== true);
+      const player = own?.metadata?.players?.find(item => item.id === p.id);
+      if (!player) continue;
+      const scores = player.score_by_hole ?? player.scoreByRoundHoleID ?? {};
+      const safeScores = Object.fromEntries(Object.entries(scores).filter(([id, value]) => holeIds.has(id) && Number.isInteger(value) && value > 0));
+      if (!Object.keys(safeScores).length) continue;
+      meta.players.push({ id: p.id, name: String(player.name ?? p.player_name ?? 'Player'), score_by_hole: safeScores, playing_handicap: player.playing_handicap ?? player.playingHandicap });
+      changed = true;
+    }
     meta.players = meta.players.map(player => {
       if (player?.id === primaryId) return player;
       const participant = participants.find(p => p.id === player?.id);
