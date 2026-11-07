@@ -136,7 +136,7 @@ async function refreshFriendScores(round, supabaseUrl, supabaseKey) {
   const headers = { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, Accept: 'application/json' };
   try {
     const participantsUrl = new URL(`${supabaseUrl}/rest/v1/friend_game_participants`);
-    participantsUrl.searchParams.set('select', 'id,user_id,is_host,score_by_hole,completed_hole_ids,updated_at');
+    participantsUrl.searchParams.set('select', 'id,user_id,is_host,score_by_hole,completed_hole_ids,updated_at,left_at');
     participantsUrl.searchParams.set('game_id', `eq.${gameId}`);
     participantsUrl.searchParams.set('id', `in.(${ids.join(',')})`);
     const response = await fetch(participantsUrl.toString(), { headers });
@@ -184,7 +184,10 @@ async function refreshFriendScores(round, supabaseUrl, supabaseKey) {
         && (s.metadata?.primary_player_id ?? s.metadata?.primaryPlayerID) === participant.id
         && s.metadata?.is_incomplete !== true && s.metadata?.isIncomplete !== true);
       const savedScores = ownRound?.metadata?.score_by_hole ?? ownRound?.metadata?.scoreByRoundHoleID;
-      const useSaved = savedScores && Date.parse(ownRound.updated_at) >= Date.parse(participant.updated_at);
+      // Leaving updates participant.updated_at without changing its score. Once a
+      // player has left, prefer their own completed scorecard over this stale
+      // live snapshot; while active, retain the freshest progress update.
+      const useSaved = savedScores && (participant.left_at || Date.parse(ownRound.updated_at) >= Date.parse(participant.updated_at));
       const fresh = useSaved ? savedScores : participant.score_by_hole;
       const valid = fresh && typeof fresh === 'object' && !Array.isArray(fresh);
       if (!valid || !Object.keys(fresh).length) return player;
