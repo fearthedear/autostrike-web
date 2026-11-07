@@ -68,7 +68,10 @@ function renderRound(round) {
   const selectedResult = playerResults?.individualResults.find((player) => player.id === roundViewState.selectedPlayerId) || null;
   const scoredSections = sectionsWithPlayerResults(scorecard.sections, selectedResult);
   const metrics = ownerScorecard.metrics || emptyMetrics();
-  const teamResults = window.AutoStrikeTeamResults?.buildTeamResults(round, scorecard.holes) || null;
+  const teamResults = window.AutoStrikeTeamResults?.buildTeamResults(round, scorecard.holes, {
+    scorecardMode: roundViewState.teamScorecardMode,
+    basis: roundViewState.teamBasis,
+  }) || null;
   const totalScore = metrics.totalScore ?? round.totalScore;
   const totalScoreText = numberText(totalScore);
   const toParValue = metrics.toPar ?? round.toPar;
@@ -155,7 +158,7 @@ function initialRoundViewState(round) {
     ['net', 'gross'],
     'gross',
   );
-  return { scorecardMode, basis, selectedPlayerId: null };
+  return { scorecardMode, basis, teamScorecardMode: scorecardMode, teamBasis: basis, selectedPlayerId: null };
 }
 
 function normalizedMode(value, allowed, fallback) {
@@ -167,6 +170,18 @@ function bindRoundInteractions() {
   root.querySelectorAll('[data-player-id]').forEach((button) => {
     button.addEventListener('click', () => {
       roundViewState.selectedPlayerId = button.dataset.playerId || null;
+      renderRound(activeRound);
+    });
+  });
+  root.querySelectorAll('[data-team-mode]').forEach((button) => {
+    button.addEventListener('click', () => {
+      roundViewState.teamScorecardMode = button.dataset.teamMode;
+      renderRound(activeRound);
+    });
+  });
+  root.querySelectorAll('[data-team-basis]').forEach((button) => {
+    button.addEventListener('click', () => {
+      roundViewState.teamBasis = button.dataset.teamBasis;
       renderRound(activeRound);
     });
   });
@@ -198,6 +213,16 @@ function teamResultsMarkup(results) {
           <h2>${escapeHtml(formatLabel)}</h2>
         </div>
         <span class="round-format-pill">${escapeHtml(`${basisLabel} ${scoreLabel}`)}</span>
+      </div>
+      <div class="round-view-controls round-team-controls" aria-label="Team scoring options">
+        ${segmentedControlMarkup('Scoring', [
+          { value: 'stableford', label: 'Stableford' },
+          { value: 'stroke_play', label: 'Stroke' },
+        ], results.scorecardMode, 'team-mode')}
+        ${segmentedControlMarkup('Handicap', [
+          { value: 'net', label: 'On' },
+          { value: 'gross', label: 'Off' },
+        ], results.requestedBasis, 'team-basis')}
       </div>
       ${results.isBasisFallback ? '<p class="round-team-note">Net results could not be reconstructed for this shared round, so gross scores are shown.</p>' : ''}
       <div class="round-team-grid">
@@ -241,7 +266,11 @@ function teamSummaryMarkup(results, round) {
   const storedSentences = Array.isArray(storedSummary?.sentences)
     ? storedSummary.sentences.filter((sentence) => typeof sentence === 'string' && sentence.trim())
     : [];
-  const sentences = storedSummary?.version === 2 && storedSentences.length === 5
+  const original = initialRoundViewState(round);
+  const canUseStored = !round.metadata?.shared_scores_refreshed
+    && results.scorecardMode === original.teamScorecardMode
+    && results.basis === original.teamBasis;
+  const sentences = canUseStored && storedSummary?.version === 2 && storedSentences.length === 5
     ? storedSentences
     : Array.isArray(results.summarySentences) ? results.summarySentences : [];
   if (!sentences.length) return '';

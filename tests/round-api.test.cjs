@@ -87,3 +87,37 @@ test('shared-round API schedules backend generation for a completed team round',
   const source = await readFile(new URL('../functions/api/round.js', `file://${__filename}`), 'utf8');
   assert.match(source, /summaryVersion === 2/);
 });
+
+test('refreshes only matched remote player scores and leaves owner and guest untouched', async (t) => {
+  const originalFetch = global.fetch;
+  t.after(() => { global.fetch = originalFetch; });
+  const owner = '00000000-0000-4000-8000-000000000001';
+  const player = '00000000-0000-4000-8000-000000000002';
+  const guest = '00000000-0000-4000-8000-000000000003';
+  const user = '00000000-0000-4000-8000-000000000004';
+  const game = '00000000-0000-4000-8000-000000000005';
+  const calls = [];
+  global.fetch = async (url) => {
+    calls.push(String(url));
+    const u = new URL(String(url));
+    if (u.pathname.endsWith('/courses')) return Response.json([{ holes: [] }]);
+    if (u.pathname.endsWith('/friend_game_participants')) return Response.json([{ id: player, user_id: user, score_by_hole: { h1: 5 }, updated_at: '2026-01-01T10:00:00Z' }]);
+    if (u.pathname.endsWith('/scores') && u.searchParams.has('metadata->>friend_game_id')) return Response.json([
+      { user_id: user, updated_at: '2026-01-01T11:00:00Z', metadata: { primary_player_id: player, score_by_hole: { h1: 6, secret: 99 } } },
+    ]);
+    return Response.json([{ id: 'dd5a8b5f-c99d-47f1-b3cd-b17560abbd90', course_id: 'course', metadata: {
+      friend_game_id: game, primary_player_id: owner, round_holes: [{ id: 'h1', par: 4 }],
+      players: [{ id: owner, score_by_hole: { h1: 3 } }, { id: player, score_by_hole: { h1: 4 } }, { id: guest, score_by_hole: { h1: 7 } }],
+      team_settings: { enabled: true }, ai_round_summary: { version: 2, sentences: ['1','2','3','4','5'] },
+    } }]);
+  };
+  const { onRequestGet } = await loadModule();
+  const response = await onRequestGet({ request: new Request('https://autostrikegolf.com/api/round?id=dd5a8b5f-c99d-47f1-b3cd-b17560abbd90'), env: { SUPABASE_URL: 'https://example.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'test-key' } });
+  const { round } = await response.json();
+  assert.equal(round.metadata.players[0].score_by_hole.h1, 3);
+  assert.equal(round.metadata.players[1].score_by_hole.h1, 6);
+  assert.equal(round.metadata.players[1].score_by_hole.secret, undefined);
+  assert.equal(round.metadata.players[2].score_by_hole.h1, 7);
+  assert.equal(round.metadata.shared_scores_refreshed, true);
+  assert.ok(calls.some(url => url.includes('/friend_game_participants')));
+});

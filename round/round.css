@@ -311,6 +311,11 @@
   gap: 12px;
 }
 
+.round-team-controls {
+  justify-content: flex-start;
+  margin-top: 16px;
+}
+
 .round-control-group {
   display: grid;
   gap: 5px;

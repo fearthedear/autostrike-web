@@ -1,5 +1,7 @@
 const SCORE_COLUMNS = [
   'id',
+  'user_id',
+  'updated_at',
   'course_id',
   'course_name',
   'front_nine_id',
@@ -64,8 +66,9 @@ export async function onRequestGet({ request, env, waitUntil }) {
 
   const round = normalizeRound(row);
   round.courseHoles = await loadCourseHoles(supabaseUrl, supabaseKey, row.course_id);
+  await refreshFriendScores(round, supabaseUrl, supabaseKey);
 
-  if (needsTeamRoundSummary(round)) {
+  if (!round.metadata.shared_scores_refreshed && needsTeamRoundSummary(round)) {
     const generation = requestTeamRoundSummary(env, supabaseKey, round.id);
     if (typeof waitUntil === 'function') {
       waitUntil(generation);
@@ -116,6 +119,68 @@ function normalizeRound(row) {
     source: row.source,
     metadata,
   };
+}
+
+// Friend rounds are saved as snapshots on each phone. Overlay each remote
+// participant's own latest submitted score, without mutating any saved row.
+async function refreshFriendScores(round, supabaseUrl, supabaseKey) {
+  const meta = round.metadata;
+  const gameId = meta.friend_game_id ?? meta.friendGameID;
+  if (!UUID_PATTERN.test(gameId || '') || !Array.isArray(meta.players)) return;
+  const primaryId = meta.primary_player_id ?? meta.primaryPlayerID;
+  if (!UUID_PATTERN.test(primaryId || '')) return;
+  const holeIds = new Set((Array.isArray(meta.round_holes) ? meta.round_holes : []).map(hole => hole?.id).filter(Boolean));
+  if (!holeIds.size) return;
+  const ids = meta.players.map(player => player?.id).filter(id => id !== primaryId && UUID_PATTERN.test(id || ''));
+  if (!ids.length) return;
+  const headers = { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, Accept: 'application/json' };
+  try {
+    const participantsUrl = new URL(`${supabaseUrl}/rest/v1/friend_game_participants`);
+    participantsUrl.searchParams.set('select', 'id,user_id,score_by_hole,completed_hole_ids,updated_at');
+    participantsUrl.searchParams.set('game_id', `eq.${gameId}`);
+    participantsUrl.searchParams.set('id', `in.(${ids.join(',')})`);
+    const response = await fetch(participantsUrl.toString(), { headers });
+    if (!response.ok) throw new Error(`Participant lookup failed (${response.status})`);
+    const participants = await response.json();
+    if (!Array.isArray(participants)) return;
+    const users = [...new Set(participants.map(p => p.user_id).filter(id => UUID_PATTERN.test(id || '')))];
+    let completed = [];
+    if (users.length) {
+      const scoresUrl = new URL(`${supabaseUrl}/rest/v1/scores`);
+      scoresUrl.searchParams.set('select', 'user_id,updated_at,metadata');
+      scoresUrl.searchParams.set('metadata->>friend_game_id', `eq.${gameId}`);
+      scoresUrl.searchParams.set('user_id', `in.(${users.join(',')})`);
+      scoresUrl.searchParams.set('deleted_at', 'is.null');
+      scoresUrl.searchParams.set('order', 'updated_at.desc');
+      scoresUrl.searchParams.set('limit', '100');
+      const scoreResponse = await fetch(scoresUrl.toString(), { headers });
+      if (!scoreResponse.ok) throw new Error(`Player score lookup failed (${scoreResponse.status})`);
+      const rows = await scoreResponse.json();
+      if (Array.isArray(rows)) completed = rows;
+    }
+    let changed = false;
+    meta.players = meta.players.map(player => {
+      const participant = participants.find(p => p.id === player?.id && p.user_id);
+      if (!participant) return player;
+      const ownRound = completed.find(s => s.user_id === participant.user_id
+        && (s.metadata?.primary_player_id ?? s.metadata?.primaryPlayerID) === participant.id
+        && s.metadata?.is_incomplete !== true && s.metadata?.isIncomplete !== true);
+      const savedScores = ownRound?.metadata?.score_by_hole ?? ownRound?.metadata?.scoreByRoundHoleID;
+      const useSaved = savedScores && Date.parse(ownRound.updated_at) >= Date.parse(participant.updated_at);
+      const fresh = useSaved ? savedScores : participant.score_by_hole;
+      const valid = fresh && typeof fresh === 'object' && !Array.isArray(fresh);
+      if (!valid || !Object.keys(fresh).length) return player;
+      const previous = player.score_by_hole ?? player.scoreByRoundHoleID ?? {};
+      const verified = Object.fromEntries(Object.entries(fresh).filter(([id, value]) => holeIds.has(id) && Number.isInteger(value) && value > 0));
+      const combined = { ...previous, ...verified };
+      if (JSON.stringify(combined) !== JSON.stringify(previous)) changed = true;
+      return { ...player, score_by_hole: combined };
+    });
+    if (changed) meta.shared_scores_refreshed = true;
+  } catch (error) {
+    // Degrade to the original shared snapshot; never fail the page for a transient lookup error.
+    console.error('Failed to refresh shared player scores:', error);
+  }
 }
 
 async function loadCourseHoles(supabaseUrl, supabaseKey, courseId) {
