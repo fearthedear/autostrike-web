@@ -131,12 +131,12 @@ async function refreshFriendScores(round, supabaseUrl, supabaseKey) {
   if (!UUID_PATTERN.test(primaryId || '')) return;
   const holeIds = new Set((Array.isArray(meta.round_holes) ? meta.round_holes : []).map(hole => hole?.id).filter(Boolean));
   if (!holeIds.size) return;
-  const ids = meta.players.map(player => player?.id).filter(id => id !== primaryId && UUID_PATTERN.test(id || ''));
-  if (!ids.length) return;
+  const ids = meta.players.map(player => player?.id).filter(id => UUID_PATTERN.test(id || ''));
+  if (ids.length < 2) return;
   const headers = { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, Accept: 'application/json' };
   try {
     const participantsUrl = new URL(`${supabaseUrl}/rest/v1/friend_game_participants`);
-    participantsUrl.searchParams.set('select', 'id,user_id,score_by_hole,completed_hole_ids,updated_at');
+    participantsUrl.searchParams.set('select', 'id,user_id,is_host,score_by_hole,completed_hole_ids,updated_at');
     participantsUrl.searchParams.set('game_id', `eq.${gameId}`);
     participantsUrl.searchParams.set('id', `in.(${ids.join(',')})`);
     const response = await fetch(participantsUrl.toString(), { headers });
@@ -158,10 +158,28 @@ async function refreshFriendScores(round, supabaseUrl, supabaseKey) {
       const rows = await scoreResponse.json();
       if (Array.isArray(rows)) completed = rows;
     }
+    // A guest has no participant row. Only fill missing guest scores from the
+    // host's own completed snapshot of this exact game and participant ID.
+    const host = participants.find(p => p.is_host === true && p.user_id);
+    const hostRound = host && completed.find(s => s.user_id === host.user_id
+      && (s.metadata?.primary_player_id ?? s.metadata?.primaryPlayerID) === host.id
+      && s.metadata?.is_incomplete !== true && s.metadata?.isIncomplete !== true);
     let changed = false;
     meta.players = meta.players.map(player => {
-      const participant = participants.find(p => p.id === player?.id && p.user_id);
-      if (!participant) return player;
+      if (player?.id === primaryId) return player;
+      const participant = participants.find(p => p.id === player?.id);
+      if (!participant) {
+        const guest = hostRound?.metadata?.players?.find(p => p.id === player?.id);
+        const previous = player.score_by_hole ?? player.scoreByRoundHoleID ?? {};
+        const guestScores = guest?.score_by_hole ?? guest?.scoreByRoundHoleID;
+        if (!guestScores || typeof guestScores !== 'object' || Array.isArray(guestScores)) return player;
+        const missing = Object.fromEntries(Object.entries(guestScores).filter(([id, value]) =>
+          holeIds.has(id) && previous[id] == null && Number.isInteger(value) && value > 0));
+        if (!Object.keys(missing).length) return player;
+        changed = true;
+        return { ...player, score_by_hole: { ...previous, ...missing } };
+      }
+      if (!participant.user_id) return player;
       const ownRound = completed.find(s => s.user_id === participant.user_id
         && (s.metadata?.primary_player_id ?? s.metadata?.primaryPlayerID) === participant.id
         && s.metadata?.is_incomplete !== true && s.metadata?.isIncomplete !== true);
@@ -173,8 +191,12 @@ async function refreshFriendScores(round, supabaseUrl, supabaseKey) {
       const previous = player.score_by_hole ?? player.scoreByRoundHoleID ?? {};
       const verified = Object.fromEntries(Object.entries(fresh).filter(([id, value]) => holeIds.has(id) && Number.isInteger(value) && value > 0));
       const combined = { ...previous, ...verified };
-      if (JSON.stringify(combined) !== JSON.stringify(previous)) changed = true;
-      return { ...player, score_by_hole: combined };
+      const ownPlayer = ownRound?.metadata?.players?.find(p => p.id === participant.id);
+      const ownHandicap = ownPlayer?.playing_handicap ?? ownPlayer?.playingHandicap;
+      const oldHandicap = player.playing_handicap ?? player.playingHandicap;
+      const validHandicap = Number.isInteger(ownHandicap) && ownHandicap >= -54 && ownHandicap <= 54;
+      if (JSON.stringify(combined) !== JSON.stringify(previous) || (validHandicap && ownHandicap !== oldHandicap)) changed = true;
+      return { ...player, score_by_hole: combined, ...(validHandicap ? { playing_handicap: ownHandicap } : {}) };
     });
     if (changed) meta.shared_scores_refreshed = true;
   } catch (error) {
