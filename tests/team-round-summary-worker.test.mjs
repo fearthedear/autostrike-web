@@ -63,9 +63,10 @@ test('builds a factual KGPA packet using played order rather than source hole nu
   assert.equal(packet.defining_swing.golf_result, 'birdie');
   assert.equal(packet.defining_swing.counting_value, 4);
   assert.deepEqual(packet.defining_swing.widest_later_lead, { margin: 3, played_hole: 13 });
-  assert.equal(packet.closing_contribution.player, 'Toby');
-  assert.equal(packet.closing_contribution.start_played_hole, 13);
-  assert.equal(packet.closing_contribution.end_played_hole, 17);
+  assert.equal(packet.closing_contribution.player, 'Ankur');
+  assert.equal(packet.closing_contribution.start_played_hole, 10);
+  assert.equal(packet.closing_contribution.end_played_hole, 11);
+  assert.equal(packet.closing_contribution.net_gain, 4);
   assert.deepEqual(packet.final_hole.contributor_names, ['Andre']);
   assert.equal(packet.final_hole.played_hole, 18);
   assert.equal(packet.final_hole.outcome, 'squared the match');

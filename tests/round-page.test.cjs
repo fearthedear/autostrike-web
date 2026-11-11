@@ -129,7 +129,7 @@ test('round page keeps an always-visible download button on mobile and desktop',
   assert.ok(fixedButton > roundRoot);
   assert.match(html, /class="round-download-fixed"[\s\S]*Download AutoStrike/);
   assert.match(html, /round\.css\?v=teamviews2/);
-  assert.match(html, /round\.js\?v=teamviews2/);
+  assert.match(html, /round\.js\?v=teamviews3/);
   assert.match(css, /\.round-download-fixed \{[\s\S]*position: fixed/);
   assert.match(css, /@media \(max-width: 760px\) \{[\s\S]*\.round-download-fixed \{[\s\S]*bottom: 0/);
   assert.match(css, /@media \(min-width: 761px\) \{[\s\S]*\.round-download-fixed \{[\s\S]*top: 24px/);

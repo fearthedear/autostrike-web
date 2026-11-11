@@ -136,12 +136,13 @@ test('the supplied KGPA round produces the expected team leaderboard', () => {
   ]);
   assert.equal(result.summarySentences.length, 5);
   assert.match(result.summarySentences[0], /finished all square at 44–44/i);
-  assert.match(result.summarySentences[2], /Ankur's birdie earned 4 Stableford points/i);
+  assert.match(result.summarySentences[2], /Ankur's gross birdie earned 4 net Stableford points/i);
   assert.match(result.summarySentences[2], /biggest one-hole swing/i);
   assert.match(result.summarySentences[2], /stretched that advantage to 3 points/i);
   assert.match(result.summarySentences[2], /on hole 13/i);
   assert.doesNotMatch(result.summarySentences.join(' '), /hole (?:19|2[0-7])/i);
-  assert.match(result.summarySentences[3], /Toby then counted on 5 straight holes/i);
+  assert.match(result.summarySentences[3], /Ankur's scores counted on 2 consecutive holes from 10–11/i);
+  assert.match(result.summarySentences[3], /from 2 points behind to 2 points ahead/i);
   assert.match(result.summarySentences[4], /Andre scored 3 points/i);
   assert.match(result.summarySentences[4], /on hole 18/i);
   assert.match(result.summarySentences[4], /to square the match at 44–44/i);

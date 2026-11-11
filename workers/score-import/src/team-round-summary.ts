@@ -8,7 +8,7 @@ Required narrative order:
 1. State the final result, teams, and format.
 2. State who led at the turn, or that it was tied.
 3. Describe the defining one-hole swing. Name the contributing player when supplied; if a golf result such as birdie/eagle and its Stableford points are supplied, explicitly connect them (for example, “Ankur's birdie earned 4 Stableford points”). Include the widest later lead when supplied.
-4. Describe the strongest comeback or closing contribution, naming the player and played-hole range when supplied. Say “Toby’s stretch” rather than unnatural wording such as “Toby from Linus & Toby”.
+4. Describe the strongest supplied positive-gain contribution, naming the player and played-hole range when supplied; otherwise describe the supplied closing_stretch team totals. Say “Toby’s stretch” rather than unnatural wording such as “Toby from Linus & Toby”.
 5. Describe the final hole. When one contributor is supplied, write “[Player] scored [value] points/strokes for [Team]”, state the hole result, and explain whether it squared, won, or confirmed the match.
 
 Rules:
@@ -16,6 +16,9 @@ Rules:
 - Refer to holes only by one-based played order from 1 through the supplied hole_count. Never expose source course-hole numbers, alternate-nine numbers, database IDs, or repeated-nine labels.
 - Match the supplied scoring mode and basis. Use “points” for Stableford and “strokes” for stroke play.
 - Prefer specific turning points, cumulative leads, individual contributions, and final-hole drama over generic praise.
+- A counting streak alone is not a comeback. Never describe a worsening deficit as an improvement; use the supplied positive net_gain.
+- Golf-result labels describe gross scores. For net Stableford, explicitly distinguish a gross par/birdie from its net Stableford points.
+- If defining_swing.shared_largest is true, call it one of the biggest one-hole swings, not a unique biggest swing.
 - Do not call ordinary deterministic scoring “lucky”, “heroic”, “dominant”, or “AI”.
 - Do not use headings, bullets, markdown, or commentary outside the five sentences.
 - Return JSON matching the requested schema.`;
@@ -66,6 +69,7 @@ export type TeamRoundFactPacket = {
   turn: RecordValue;
   defining_swing: RecordValue | null;
   closing_contribution: RecordValue | null;
+  closing_stretch: RecordValue;
   final_hole: RecordValue;
   allowed_team_names: string[];
   allowed_player_names: string[];
@@ -187,7 +191,7 @@ export function buildTeamRoundFactPacket(row: RecordValue, courseHoles: unknown[
   const turn = cumulativeCheckpoint(first, second, turnIndex, scorecardMode);
   const swing = definingSwing(first, second, scorecardMode);
   const widest = widestLead(first, second, scorecardMode);
-  const closing = strongestClosingContribution(first, second, turnIndex, scorecardMode);
+  const closing = scoringMode === "best_ball" ? strongestClosingContribution(first, second, turnIndex, scorecardMode) : null;
   const lastIndex = holeCount - 1;
   const firstLast = first.holeResults[lastIndex]!;
   const secondLast = second.holeResults[lastIndex]!;
@@ -222,6 +226,8 @@ export function buildTeamRoundFactPacket(row: RecordValue, courseHoles: unknown[
     },
     defining_swing: swing ? {
       played_hole: swing.index + 1,
+      shared_largest: swing.tiedCount > 1,
+      golf_result_basis: "gross",
       team: swing.winner.displayName,
       contributor_names: contributorNames(swing.winner, swing.winner.holeResults[swing.index]!),
       golf_result: golfScoreName(swing.winner.holeResults[swing.index]!.grossScore, swing.winner.holeResults[swing.index]!.par),
@@ -235,6 +241,14 @@ export function buildTeamRoundFactPacket(row: RecordValue, courseHoles: unknown[
         : null,
     } : null,
     closing_contribution: closing,
+    closing_stretch: {
+      start_played_hole: turnIndex + 1,
+      end_played_hole: holeCount,
+      scores: {
+        [first.displayName]: sumValues(first.holeResults.slice(turnIndex)),
+        [second.displayName]: sumValues(second.holeResults.slice(turnIndex)),
+      },
+    },
     final_hole: {
       played_hole: holeCount,
       winning_team: lastWinner?.displayName ?? null,
@@ -336,7 +350,9 @@ function definingSwing(first: TeamResult, second: TeamResult, mode: string): Rec
     if (!biggest || swing > biggest.swing) {
       const beforeWinner = sumValues(winner.holeResults.slice(0, index));
       const beforeLoser = sumValues(loser.holeResults.slice(0, index));
-      biggest = { index, winner, loser, winnerValue, loserValue, swing, beforeWinner, beforeLoser, afterWinner: beforeWinner + winnerValue, afterLoser: beforeLoser + loserValue };
+      biggest = { index, winner, loser, winnerValue, loserValue, swing, beforeWinner, beforeLoser, afterWinner: beforeWinner + winnerValue, afterLoser: beforeLoser + loserValue, tiedCount: 1 };
+    } else if (swing === biggest.swing) {
+      biggest.tiedCount += 1;
     }
   }
   return biggest;
@@ -360,17 +376,19 @@ function widestLead(first: TeamResult, second: TeamResult, mode: string): Record
 function strongestClosingContribution(first: TeamResult, second: TeamResult, startIndex: number, mode: string): RecordValue | null {
   const candidates = [first, second].flatMap((team) => {
     const opponent = team.id === first.id ? second : first;
-    return team.members.flatMap((member) => {
-      const stretch = longestStretch(team.holeResults, member.id, startIndex);
-      if (stretch.length < 2) return [];
-      const beforeTeam = sumValues(team.holeResults.slice(0, stretch.startIndex));
-      const beforeOpponent = sumValues(opponent.holeResults.slice(0, stretch.startIndex));
-      const afterTeam = sumValues(team.holeResults.slice(0, stretch.endIndex + 1));
-      const afterOpponent = sumValues(opponent.holeResults.slice(0, stretch.endIndex + 1));
-      return [{ team, member, stretch, beforeTeam, beforeOpponent, afterTeam, afterOpponent }];
-    });
+    return team.members.flatMap((member) => contributionStretches(team.holeResults, member.id, startIndex)
+      .filter((stretch) => stretch.length >= 2)
+      .flatMap((stretch) => {
+        const beforeTeam = sumValues(team.holeResults.slice(0, stretch.startIndex));
+        const beforeOpponent = sumValues(opponent.holeResults.slice(0, stretch.startIndex));
+        const afterTeam = sumValues(team.holeResults.slice(0, stretch.endIndex + 1));
+        const afterOpponent = sumValues(opponent.holeResults.slice(0, stretch.endIndex + 1));
+        const gain = scoreMargin(afterTeam, afterOpponent, mode) - scoreMargin(beforeTeam, beforeOpponent, mode);
+        return gain > 0 ? [{ team, member, stretch, gain, beforeTeam, beforeOpponent, afterTeam, afterOpponent }] : [];
+      }));
   });
-  candidates.sort((left, right) => right.stretch.length - left.stretch.length || left.member.name.localeCompare(right.member.name));
+  candidates.sort((left, right) => right.gain - left.gain || right.stretch.length - left.stretch.length
+    || right.stretch.endIndex - left.stretch.endIndex || left.member.name.localeCompare(right.member.name));
   const chosen = candidates[0];
   return chosen ? {
     player: chosen.member.name,
@@ -378,23 +396,26 @@ function strongestClosingContribution(first: TeamResult, second: TeamResult, sta
     length: chosen.stretch.length,
     start_played_hole: chosen.stretch.startIndex + 1,
     end_played_hole: chosen.stretch.endIndex + 1,
+    net_gain: chosen.gain,
     position_before: scorePosition(chosen.beforeTeam, chosen.beforeOpponent, mode),
     position_after: scorePosition(chosen.afterTeam, chosen.afterOpponent, mode),
   } : null;
 }
 
-function longestStretch(holes: HoleResult[], playerId: string, startIndex: number): { length: number; startIndex: number; endIndex: number } {
-  let best = { length: 0, startIndex: 0, endIndex: 0 };
-  let current = { length: 0, startIndex: 0, endIndex: 0 };
+function contributionStretches(holes: HoleResult[], playerId: string, startIndex: number): { length: number; startIndex: number; endIndex: number }[] {
+  const stretches: { length: number; startIndex: number; endIndex: number }[] = [];
+  let current: { length: number; startIndex: number; endIndex: number } | null = null;
   holes.forEach((hole, index) => {
     if (index >= startIndex && hole.contributorIds.includes(playerId)) {
-      if (!current.length) current.startIndex = index;
+      if (!current) {
+        current = { length: 0, startIndex: index, endIndex: index };
+        stretches.push(current);
+      }
       current.length += 1;
       current.endIndex = index;
-      if (current.length > best.length) best = { ...current };
-    } else current = { length: 0, startIndex: 0, endIndex: 0 };
+    } else current = null;
   });
-  return best;
+  return stretches;
 }
 
 function cumulativeCheckpoint(first: TeamResult, second: TeamResult, count: number, mode: string): RecordValue {

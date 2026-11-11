@@ -270,13 +270,14 @@ function teamSummaryMarkup(results, round) {
   const canUseStored = !round.metadata?.shared_scores_refreshed
     && results.scorecardMode === original.teamScorecardMode
     && results.basis === original.teamBasis;
-  const sentences = canUseStored && storedSummary?.version === 2 && storedSentences.length === 5
+  const usesStoredAI = canUseStored && storedSummary?.version === 2 && storedSentences.length === 5;
+  const sentences = usesStoredAI
     ? storedSentences
     : Array.isArray(results.summarySentences) ? results.summarySentences : [];
   if (!sentences.length) return '';
   return `
     <section class="round-card round-ai-summary">
-      <p class="round-eyebrow">AI Round Summary</p>
+      <p class="round-eyebrow">${usesStoredAI ? 'AI Round Summary' : 'Round Summary'}</p>
       <h2>How the match unfolded</h2>
       <p>${sentences.map((sentence) => escapeHtml(sentence)).join(' ')}</p>
       <span>Generated from the hole-by-hole scores.</span>

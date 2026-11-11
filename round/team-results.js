@@ -218,10 +218,12 @@
       sentences.push(`${turnTotals[0].team.displayName} held a ${turnMargin}-${marginUnit} lead at the turn.`);
     }
 
-    const biggestSwing = biggestMomentumSwing(teams[0], teams[1], scorecardMode);
+    const biggestSwing = biggestMomentumSwing(teams[0], teams[1], scorecardMode, results.basis);
     sentences.push(biggestSwing || 'Neither side found a decisive one-hole swing, keeping the match finely balanced throughout.');
 
-    const comeback = comebackSentence(teams[0], teams[1], scorecardMode, turnIndex);
+    const comeback = results.scoringMode === 'best_ball'
+      ? comebackSentence(teams[0], teams[1], scorecardMode, turnIndex)
+      : null;
     sentences.push(comeback || backNineSentence(teams[0], teams[1], scorecardMode, turnIndex));
 
     const first = teams[0];
@@ -257,7 +259,7 @@
     return sentences.slice(0, 5);
   }
 
-  function biggestMomentumSwing(first, second, scorecardMode) {
+  function biggestMomentumSwing(first, second, scorecardMode, basis) {
     let biggest = null;
     const holeCount = Math.min(first.holeResults.length, second.holeResults.length);
     for (let index = 0; index < holeCount; index += 1) {
@@ -274,7 +276,9 @@
         const beforeLoser = sumHoleValues(loser.holeResults.slice(0, index));
         const afterWinner = beforeWinner + winnerValue;
         const afterLoser = beforeLoser + loserValue;
-        biggest = { index, winner, loser, winnerValue, loserValue, swing, beforeWinner, beforeLoser, afterWinner, afterLoser };
+        biggest = { index, winner, loser, winnerValue, loserValue, swing, beforeWinner, beforeLoser, afterWinner, afterLoser, tiedCount: 1 };
+      } else if (swing === biggest.swing) {
+        biggest.tiedCount += 1;
       }
     }
     if (!biggest) return null;
@@ -283,14 +287,14 @@
     const contributors = contributorNames(biggest.winner, winnerHole);
     const grossResult = contributors.length === 1 ? golfScoreName(winnerHole.grossScore, winnerHole.par) : null;
     const playerText = grossResult && scorecardMode === 'stableford'
-      ? `${contributors[0]}'s ${grossResult} earned ${winnerHole.value} Stableford points and produced`
+      ? `${contributors[0]}'s ${basis === 'net' ? 'gross ' : ''}${grossResult} earned ${winnerHole.value} ${basis === 'net' ? 'net ' : ''}Stableford points and produced`
       : contributors.length
         ? `${joinNames(contributors)} delivered`
         : `${biggest.winner.displayName} produced`;
     const unit = scorecardMode === 'stableford' ? 'point' : 'stroke';
     const before = scorePosition(biggest.beforeWinner, biggest.beforeLoser, scorecardMode);
     const after = scorePosition(biggest.afterWinner, biggest.afterLoser, scorecardMode);
-    let sentence = `${playerText} the biggest one-hole swing on ${holeLabel(winnerHole, biggest.index)}, a ${biggest.swing}-${unit} gain that took ${biggest.winner.displayName} from ${before} to ${after}`;
+    let sentence = `${playerText} ${biggest.tiedCount > 1 ? 'one of the biggest one-hole swings' : 'the biggest one-hole swing'} on ${holeLabel(winnerHole, biggest.index)}, a ${biggest.swing}-${unit} gain that took ${biggest.winner.displayName} from ${before} to ${after}`;
     const widest = widestLead(first, second, scorecardMode);
     const afterMargin = Math.abs(scoreMargin(biggest.afterWinner, biggest.afterLoser, scorecardMode));
     if (widest?.team.id === biggest.winner.id && widest.index > biggest.index && widest.margin > afterMargin) {
@@ -324,24 +328,25 @@
   function comebackSentence(first, second, scorecardMode, startIndex) {
     const candidates = [first, second].flatMap((team) => {
       const opponent = team.id === first.id ? second : first;
-      const contributor = leadingContributor(team, startIndex);
-      if (!contributor || contributor.stretch.length < 2) return [];
-      const start = contributor.stretch.startIndex;
-      const end = contributor.stretch.endIndex;
-      const beforeTeam = sumHoleValues(team.holeResults.slice(0, start));
-      const beforeOpponent = sumHoleValues(opponent.holeResults.slice(0, start));
-      const afterTeam = sumHoleValues(team.holeResults.slice(0, end + 1));
-      const afterOpponent = sumHoleValues(opponent.holeResults.slice(0, end + 1));
-      return [{ team, opponent, contributor, beforeTeam, beforeOpponent, afterTeam, afterOpponent }];
+      return team.members.flatMap((member) => contributionStretches(team.holeResults, member.id, startIndex)
+        .filter((stretch) => stretch.length >= 2)
+        .flatMap((stretch) => {
+          const beforeTeam = sumHoleValues(team.holeResults.slice(0, stretch.startIndex));
+          const beforeOpponent = sumHoleValues(opponent.holeResults.slice(0, stretch.startIndex));
+          const afterTeam = sumHoleValues(team.holeResults.slice(0, stretch.endIndex + 1));
+          const afterOpponent = sumHoleValues(opponent.holeResults.slice(0, stretch.endIndex + 1));
+          const gain = scoreMargin(afterTeam, afterOpponent, scorecardMode)
+            - scoreMargin(beforeTeam, beforeOpponent, scorecardMode);
+          return gain > 0 ? [{ team, member, stretch, gain, beforeTeam, beforeOpponent, afterTeam, afterOpponent }] : [];
+        }));
     });
-    if (!candidates.length) return null;
-
-    candidates.sort((left, right) => right.contributor.stretch.length - left.contributor.stretch.length || right.contributor.count - left.contributor.count);
+    candidates.sort((left, right) => right.gain - left.gain || right.stretch.length - left.stretch.length
+      || right.stretch.endIndex - left.stretch.endIndex || left.member.name.localeCompare(right.member.name));
     const chosen = candidates[0];
+    if (!chosen) return null;
     const before = scorePosition(chosen.beforeTeam, chosen.beforeOpponent, scorecardMode);
     const after = scorePosition(chosen.afterTeam, chosen.afterOpponent, scorecardMode);
-    const stretch = chosen.contributor.stretch;
-    return `${chosen.contributor.member.name} then counted on ${stretch.length} straight holes from ${stretch.startHole}–${stretch.endHole}, driving ${chosen.team.displayName} from ${before} to ${after}.`;
+    return `${chosen.member.name}'s scores counted on ${chosen.stretch.length} consecutive holes from ${chosen.stretch.startIndex + 1}–${chosen.stretch.endIndex + 1}, helping ${chosen.team.displayName} improve from ${before} to ${after}.`;
   }
 
   function backNineSentence(first, second, scorecardMode, startIndex) {
@@ -357,42 +362,20 @@
     return `${stronger.displayName} had the stronger closing stretch, ${strongerTotal}–${weakerTotal} against ${weaker.displayName}.`;
   }
 
-  function leadingContributor(team, startIndex) {
-    const backNine = team.holeResults.slice(startIndex);
-    const counts = new Map();
-    backNine.forEach((hole) => {
-      (hole.contributorIds || []).forEach((playerId) => {
-        counts.set(playerId, (counts.get(playerId) || 0) + 1);
-      });
-    });
-    const contributor = team.members
-      .map((member) => ({ member, count: counts.get(member.id) || 0 }))
-      .sort((left, right) => right.count - left.count || left.member.name.localeCompare(right.member.name))[0];
-    if (!contributor || contributor.count === 0) return null;
-    return {
-      ...contributor,
-      stretch: longestContributionStretch(team.holeResults, contributor.member.id, startIndex),
-    };
-  }
-
-  function longestContributionStretch(holes, playerId, startIndex = 0) {
-    let best = { length: 0, startHole: null, endHole: null, startIndex: null, endIndex: null };
-    let current = { length: 0, startHole: null, endHole: null, startIndex: null, endIndex: null };
+  function contributionStretches(holes, playerId, startIndex = 0) {
+    const stretches = [];
+    let current = null;
     holes.forEach((hole, index) => {
       if (index >= startIndex && (hole.contributorIds || []).includes(playerId)) {
-        if (current.length === 0) {
-          current.startHole = index + 1;
-          current.startIndex = index;
+        if (!current) {
+          current = { length: 0, startIndex: index, endIndex: index };
+          stretches.push(current);
         }
         current.length += 1;
-        current.endHole = index + 1;
         current.endIndex = index;
-        if (current.length > best.length) best = { ...current };
-      } else {
-        current = { length: 0, startHole: null, endHole: null, startIndex: null, endIndex: null };
-      }
+      } else current = null;
     });
-    return best;
+    return stretches;
   }
 
   function scoreMargin(teamScore, opponentScore, scorecardMode) {
